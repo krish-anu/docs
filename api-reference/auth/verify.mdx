@@ -1,0 +1,77 @@
+---
+title: "Verify Email"
+openapi: "POST /api/auth/verify"
+---
+
+Verify user email with the OTP sent during signup.
+
+## Request Body
+
+```json
+{
+  "email": "user@example.com",
+  "otp": "123456"
+}
+```
+
+## Parameters
+
+| Field   | Type   | Required | Description              |
+| ------- | ------ | -------- | ------------------------ |
+| `email` | string | Yes      | Email used during signup |
+| `otp`   | string | Yes      | 6-digit OTP from email   |
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "user": {
+        "id": "uuid-here",
+        "email": "user@example.com",
+        "fullName": "John Doe",
+        "phone": "+94771234567",
+        "role": "USER",
+        "isVerified": true,
+        "createdAt": "2024-01-15T10:30:00Z"
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="400 Bad Request">
+    ```json
+    {
+      "statusCode": 400,
+      "message": "Invalid OTP"
+    }
+    ```
+  </Tab>
+  <Tab title="404 Not Found">
+    ```json
+    {
+      "statusCode": 404,
+      "message": "User not found"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+curl -X POST https://api.trash2cash.lk/api/auth/verify \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "otp": "123456"
+  }'
+```
+
+## Notes
+
+- OTP expires after 10 minutes
+- Upon successful verification, a JWT token is returned
+- User can now login normally
+- Use `/api/auth/resend-otp` if OTP expires

@@ -1,0 +1,96 @@
+---
+title: "Get Booking"
+openapi: "GET /api/bookings/{id}"
+---
+
+Get details of a specific booking.
+
+## Authorization
+
+<Info>
+  Requires authentication. Include JWT token in the Authorization header.
+</Info>
+
+```
+Authorization: Bearer <token>
+```
+
+## Path Parameters
+
+| Parameter | Type   | Description  |
+| --------- | ------ | ------------ |
+| `id`      | string | Booking UUID |
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "id": "booking-uuid",
+      "userId": "user-uuid",
+      "driverId": "driver-uuid",
+      "wasteCategoryId": "category-uuid",
+      "estimatedWeightKg": 10.5,
+      "actualWeightKg": 11.0,
+      "estimatedMinAmount": 472.50,
+      "estimatedMaxAmount": 577.50,
+      "finalAmount": 550.00,
+      "address": "123 Main Street, Colombo 05",
+      "latitude": 6.9271,
+      "longitude": 79.8612,
+      "scheduledDate": "2024-02-01T10:00:00Z",
+      "status": "COMPLETED",
+      "notes": "Please call before arriving",
+      "createdAt": "2024-01-25T14:30:00Z",
+      "updatedAt": "2024-02-01T11:30:00Z",
+      "user": {
+        "id": "user-uuid",
+        "fullName": "John Doe",
+        "email": "user@example.com",
+        "phone": "+94771234567"
+      },
+      "driver": {
+        "id": "driver-uuid",
+        "fullName": "Driver Name",
+        "phone": "+94779876543"
+      },
+      "wasteCategory": {
+        "id": "category-uuid",
+        "name": "Plastic",
+        "description": "All types of recyclable plastic",
+        "pricePerKg": 50.00
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="404 Not Found">
+    ```json
+    {
+      "statusCode": 404,
+      "message": "Booking not found"
+    }
+    ```
+  </Tab>
+  <Tab title="403 Forbidden">
+    ```json
+    {
+      "statusCode": 403,
+      "message": "You don't have access to this booking"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+curl "https://api.trash2cash.lk/api/bookings/booking-uuid" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+## Notes
+
+- Users can only view their own bookings
+- Drivers can view bookings assigned to them
+- Admins can view all bookings

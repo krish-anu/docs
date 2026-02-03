@@ -1,0 +1,79 @@
+---
+title: "Send Message"
+openapi: "POST /api/chat/message"
+---
+
+Send a message to the AI chat assistant.
+
+## Authorization
+
+<Info>
+  Requires authentication. Include JWT token in the Authorization header.
+</Info>
+
+```
+Authorization: Bearer <token>
+```
+
+## Request Body
+
+```json
+{
+  "message": "What types of waste do you accept?"
+}
+```
+
+## Parameters
+
+| Field     | Type   | Required | Description             |
+| --------- | ------ | -------- | ----------------------- |
+| `message` | string | Yes      | User's message/question |
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "id": "message-uuid",
+      "role": "assistant",
+      "content": "We accept various types of recyclable waste including:\n\n1. **Plastic** - PET bottles, containers, packaging (LKR 50/kg)\n2. **Paper** - Newspapers, cardboard, office paper (LKR 30/kg)\n3. **Metal** - Aluminum cans, steel, copper (LKR 100/kg)\n4. **Glass** - Bottles, jars, containers (LKR 25/kg)\n5. **E-Waste** - Electronics, batteries, cables (LKR 150/kg)\n\nWould you like to schedule a pickup?",
+      "createdAt": "2024-01-25T14:30:00Z"
+    }
+    ```
+  </Tab>
+  <Tab title="400 Bad Request">
+    ```json
+    {
+      "statusCode": 400,
+      "message": "Message is required"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+curl -X POST "https://api.trash2cash.lk/api/chat/message" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -H "Content-Type: application/json" \
+  -d '{ "message": "What types of waste do you accept?" }'
+```
+
+## Sample Questions
+
+The assistant can help with:
+
+- "What types of waste do you accept?"
+- "How does pricing work?"
+- "How do I schedule a pickup?"
+- "What happens after I book?"
+- "How long does a pickup take?"
+- "Can I cancel my booking?"
+
+## Notes
+
+- Assistant has context about Trash2Cash services
+- Responses are formatted with markdown
+- Chat history is maintained per user session

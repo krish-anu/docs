@@ -1,0 +1,111 @@
+---
+title: "Subscribe"
+openapi: "POST /api/notifications/subscribe"
+---
+
+Subscribe to push notifications.
+
+## Authorization
+
+<Info>
+  Requires authentication. Include JWT token in the Authorization header.
+</Info>
+
+```
+Authorization: Bearer <token>
+```
+
+## Request Body
+
+```json
+{
+  "subscription": {
+    "endpoint": "https://fcm.googleapis.com/fcm/send/...",
+    "keys": {
+      "p256dh": "public-key-here",
+      "auth": "auth-secret-here"
+    }
+  }
+}
+```
+
+## Parameters
+
+| Field                      | Type   | Required | Description                           |
+| -------------------------- | ------ | -------- | ------------------------------------- |
+| `subscription`             | object | Yes      | Push subscription object from browser |
+| `subscription.endpoint`    | string | Yes      | Push service endpoint URL             |
+| `subscription.keys.p256dh` | string | Yes      | Public key for encryption             |
+| `subscription.keys.auth`   | string | Yes      | Authentication secret                 |
+
+## Response
+
+<Tabs>
+  <Tab title="201 Created">
+    ```json
+    {
+      "id": "subscription-uuid",
+      "message": "Successfully subscribed to push notifications"
+    }
+    ```
+  </Tab>
+  <Tab title="400 Bad Request">
+    ```json
+    {
+      "statusCode": 400,
+      "message": "Invalid subscription object"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+curl -X POST "https://api.trash2cash.lk/api/notifications/subscribe" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "subscription": {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/...",
+      "keys": {
+        "p256dh": "BNcRd...",
+        "auth": "tBHI..."
+      }
+    }
+  }'
+```
+
+## Client-Side Implementation
+
+```javascript
+// Request notification permission
+const permission = await Notification.requestPermission();
+
+if (permission === "granted") {
+  // Get service worker registration
+  const registration = await navigator.serviceWorker.ready;
+
+  // Subscribe to push
+  const subscription = await registration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+  });
+
+  // Send subscription to server
+  await fetch("/api/notifications/subscribe", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ subscription }),
+  });
+}
+```
+
+## Notes
+
+- Uses Web Push Protocol with VAPID
+- Subscriptions are stored per user per device
+- Multiple devices can be subscribed for the same user

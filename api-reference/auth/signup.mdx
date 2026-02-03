@@ -1,0 +1,76 @@
+---
+title: "Signup"
+openapi: "POST /api/auth/signup"
+---
+
+Register a new user account. An OTP will be sent to the provided email for verification.
+
+## Request Body
+
+```json
+{
+  "email": "user@example.com",
+  "password": "SecurePassword123",
+  "fullName": "John Doe",
+  "phone": "+94771234567"
+}
+```
+
+## Parameters
+
+| Field      | Type   | Required | Description         |
+| ---------- | ------ | -------- | ------------------- |
+| `email`    | string | Yes      | Valid email address |
+| `password` | string | Yes      | Min 8 characters    |
+| `fullName` | string | Yes      | User's full name    |
+| `phone`    | string | No       | Phone number        |
+
+## Response
+
+<Tabs>
+  <Tab title="201 Created">
+    ```json
+    {
+      "message": "Verification OTP sent to email"
+    }
+    ```
+  </Tab>
+  <Tab title="409 Conflict">
+    ```json
+    {
+      "statusCode": 409,
+      "message": "Email already registered"
+    }
+    ```
+  </Tab>
+  <Tab title="400 Bad Request">
+    ```json
+    {
+      "statusCode": 400,
+      "message": [
+        "email must be an email",
+        "password must be at least 8 characters"
+      ]
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+curl -X POST https://api.trash2cash.lk/api/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "SecurePassword123",
+    "fullName": "John Doe",
+    "phone": "+94771234567"
+  }'
+```
+
+## Notes
+
+- After successful signup, check your email for the 6-digit OTP
+- Use the `/api/auth/verify` endpoint to verify the account
+- Passwords are hashed using bcrypt before storage

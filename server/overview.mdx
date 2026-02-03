@@ -1,0 +1,175 @@
+---
+title: "Server Overview"
+description: "NestJS backend architecture for Trash2Cash"
+---
+
+## Introduction
+
+The Trash2Cash server is built with [NestJS](https://nestjs.com/), a progressive Node.js framework for building efficient and scalable server-side applications.
+
+## Tech Stack
+
+<CardGroup cols={2}>
+  <Card title="NestJS" icon="node">
+    TypeScript-based Node.js framework with dependency injection.
+  </Card>
+  <Card title="Prisma" icon="database">
+    Next-generation ORM for PostgreSQL with type-safe queries.
+  </Card>
+  <Card title="PostgreSQL" icon="elephant">
+    Robust relational database for data persistence.
+  </Card>
+  <Card title="Redis" icon="bolt">
+    In-memory cache for sessions and real-time features.
+  </Card>
+</CardGroup>
+
+## Project Structure
+
+```
+server/
+├── prisma/
+│   ├── schema.prisma      # Database schema
+│   ├── seed.ts            # Seed data
+│   └── migrations/        # Database migrations
+├── src/
+│   ├── main.ts            # Application entry point
+│   ├── app.module.ts      # Root module
+│   ├── auth/              # Authentication module
+│   ├── users/             # Users module
+│   ├── bookings/          # Bookings module
+│   ├── admin/             # Admin module
+│   ├── notifications/     # Push notifications
+│   ├── chat/              # AI chat assistant
+│   ├── common/            # Shared utilities
+│   │   ├── guards/        # Auth guards
+│   │   ├── decorators/    # Custom decorators
+│   │   ├── filters/       # Exception filters
+│   │   ├── interceptors/  # Request/response interceptors
+│   │   └── logger/        # Winston logger
+│   └── prisma/            # Prisma service
+└── test/                  # E2E tests
+```
+
+## Core Modules
+
+### Auth Module
+
+Handles user authentication with JWT tokens, signup, login, and email verification.
+
+### Users Module
+
+Manages user profiles, role-based permissions, and user data.
+
+### Bookings Module
+
+Core business logic for waste pickup scheduling and management.
+
+### Admin Module
+
+Administrative functions, pricing management, and driver assignment.
+
+### Notifications Module
+
+Web push notifications using VAPID keys.
+
+### Chat Module
+
+AI-powered assistant for user queries.
+
+## Entry Point
+
+```typescript
+// src/main.ts
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./app.module";
+import { ValidationPipe } from "@nestjs/common";
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  // Enable CORS
+  app.enableCors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  });
+
+  // Global validation pipe
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+
+  // Global prefix
+  app.setGlobalPrefix("api");
+
+  await app.listen(process.env.PORT || 3001);
+}
+
+bootstrap();
+```
+
+## Root Module
+
+```typescript
+// src/app.module.ts
+import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+import { PrismaModule } from "./prisma/prisma.module";
+import { AuthModule } from "./auth/auth.module";
+import { UsersModule } from "./users/users.module";
+import { BookingsModule } from "./bookings/bookings.module";
+import { AdminModule } from "./admin/admin.module";
+import { NotificationsModule } from "./notifications/notifications.module";
+import { ChatModule } from "./chat/chat.module";
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    PrismaModule,
+    AuthModule,
+    UsersModule,
+    BookingsModule,
+    AdminModule,
+    NotificationsModule,
+    ChatModule,
+  ],
+})
+export class AppModule {}
+```
+
+## Configuration
+
+Environment variables are managed through `@nestjs/config`:
+
+```typescript
+// Access config in services
+@Injectable()
+export class SomeService {
+  constructor(private config: ConfigService) {}
+
+  someMethod() {
+    const dbUrl = this.config.get("DATABASE_URL");
+  }
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Modules" icon="cubes" href="/server/modules">
+    Detailed module documentation.
+  </Card>
+  <Card title="Database" icon="database" href="/server/prisma-database">
+    Prisma schema and migrations.
+  </Card>
+  <Card title="Authentication" icon="lock" href="/server/authentication">
+    JWT authentication flow.
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference">
+    Complete API documentation.
+  </Card>
+</CardGroup>

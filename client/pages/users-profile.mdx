@@ -1,0 +1,239 @@
+---
+title: "User Profile"
+description: "User profile settings and management"
+---
+
+## Overview
+
+The Profile page (`/users/profile`) allows users to view and update their personal information.
+
+## Features
+
+- View profile information
+- Update personal details
+- Change password
+- Manage notification preferences
+
+## Profile Page
+
+```tsx
+// app/users/profile/page.tsx
+"use client";
+
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/components/auth/auth-provider";
+import { apiFetch } from "@/lib/api";
+
+export default function ProfilePage() {
+  const { user, refreshUser } = useAuth();
+  const [formData, setFormData] = useState({
+    fullName: user?.fullName ?? "",
+    phone: user?.phone ?? "",
+    address: user?.address ?? "",
+  });
+
+  const mutation = useMutation({
+    mutationFn: (data) =>
+      apiFetch("/users/profile", {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      refreshUser();
+      toast({ title: "Profile updated successfully" });
+    },
+  });
+
+  return (
+    <div className="space-y-6">
+      <h1>Profile Settings</h1>
+
+      <Card>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            mutation.mutate(formData);
+          }}
+        >
+          <div className="space-y-4">
+            {/* Email (read-only) */}
+            <div>
+              <Label>Email</Label>
+              <Input value={user?.email} disabled />
+              <p className="text-muted text-sm">Email cannot be changed</p>
+            </div>
+
+            {/* Full Name */}
+            <div>
+              <Label>Full Name</Label>
+              <Input
+                value={formData.fullName}
+                onChange={(e) =>
+                  setFormData((p) => ({ ...p, fullName: e.target.value }))
+                }
+              />
+            </div>
+
+            {/* Phone */}
+            <div>
+              <Label>Phone Number</Label>
+              <Input
+                value={formData.phone}
+                onChange={(e) =>
+                  setFormData((p) => ({ ...p, phone: e.target.value }))
+                }
+                placeholder="+94 XX XXX XXXX"
+              />
+            </div>
+
+            {/* Address */}
+            <div>
+              <Label>Default Address</Label>
+              <Textarea
+                value={formData.address}
+                onChange={(e) =>
+                  setFormData((p) => ({ ...p, address: e.target.value }))
+                }
+                placeholder="Enter your default pickup address"
+              />
+            </div>
+
+            <Button type="submit" disabled={mutation.isPending}>
+              {mutation.isPending ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
+        </form>
+      </Card>
+
+      {/* Password Change Section */}
+      <Card>
+        <h3>Change Password</h3>
+        <PasswordChangeForm />
+      </Card>
+
+      {/* Account Info */}
+      <Card>
+        <h3>Account Information</h3>
+        <dl>
+          <dt>Member Since</dt>
+          <dd>{new Date(user?.createdAt).toLocaleDateString()}</dd>
+
+          <dt>Role</dt>
+          <dd>{user?.role}</dd>
+
+          <dt>Verified</dt>
+          <dd>{user?.isVerified ? "Yes" : "No"}</dd>
+        </dl>
+      </Card>
+    </div>
+  );
+}
+```
+
+## Password Change
+
+```tsx
+function PasswordChangeForm() {
+  const [passwords, setPasswords] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  const mutation = useMutation({
+    mutationFn: (data) =>
+      apiFetch("/users/change-password", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      setPasswords({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      toast({ title: "Password changed successfully" });
+    },
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (passwords.newPassword !== passwords.confirmPassword) {
+      toast({ title: "Passwords do not match", variant: "destructive" });
+      return;
+    }
+    mutation.mutate({
+      currentPassword: passwords.currentPassword,
+      newPassword: passwords.newPassword,
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <Input
+        type="password"
+        value={passwords.currentPassword}
+        onChange={(e) =>
+          setPasswords((p) => ({ ...p, currentPassword: e.target.value }))
+        }
+        placeholder="Current Password"
+      />
+      <Input
+        type="password"
+        value={passwords.newPassword}
+        onChange={(e) =>
+          setPasswords((p) => ({ ...p, newPassword: e.target.value }))
+        }
+        placeholder="New Password"
+      />
+      <Input
+        type="password"
+        value={passwords.confirmPassword}
+        onChange={(e) =>
+          setPasswords((p) => ({ ...p, confirmPassword: e.target.value }))
+        }
+        placeholder="Confirm New Password"
+      />
+      <Button type="submit" disabled={mutation.isPending}>
+        Change Password
+      </Button>
+    </form>
+  );
+}
+```
+
+## User Data Structure
+
+```typescript
+interface User {
+  id: string;
+  email: string;
+  fullName: string;
+  phone?: string;
+  address?: string;
+  role: "USER" | "ADMIN" | "DRIVER";
+  isVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+## Related Pages
+
+<CardGroup cols={2}>
+  <Card
+    title="Dashboard"
+    icon="chart-line"
+    href="/client/pages/users-dashboard"
+  >
+    Return to dashboard.
+  </Card>
+  <Card
+    title="Notifications"
+    icon="bell"
+    href="/client/pages/users-notifications"
+  >
+    Manage notification settings.
+  </Card>
+</CardGroup>

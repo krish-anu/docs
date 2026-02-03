@@ -1,0 +1,248 @@
+---
+title: "Admin Pricing"
+description: "Pricing configuration for waste categories"
+---
+
+## Overview
+
+The Admin Pricing page (`/admin/pricing`) allows administrators to configure pricing for different waste categories.
+
+## Features
+
+- View all waste categories
+- Add new categories
+- Update pricing per kg
+- Activate/deactivate categories
+- Set minimum/maximum weights
+
+## Pricing Management
+
+```tsx
+// app/admin/pricing/page.tsx
+"use client";
+
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
+
+export default function AdminPricingPage() {
+  const { data: categories, refetch } = useQuery({
+    queryKey: ["admin", "pricing"],
+    queryFn: () => apiFetch("/admin/pricing"),
+  });
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between">
+        <h1>Pricing Configuration</h1>
+        <Button onClick={() => setShowAddModal(true)}>+ Add Category</Button>
+      </div>
+
+      {/* Categories Table */}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Category</TableHead>
+            <TableHead>Description</TableHead>
+            <TableHead>Price/kg (LKR)</TableHead>
+            <TableHead>Min Weight</TableHead>
+            <TableHead>Max Weight</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {categories?.map((category) => (
+            <TableRow key={category.id}>
+              <TableCell className="font-medium">{category.name}</TableCell>
+              <TableCell>{category.description}</TableCell>
+              <TableCell>LKR {category.pricePerKg}</TableCell>
+              <TableCell>{category.minWeightKg} kg</TableCell>
+              <TableCell>{category.maxWeightKg} kg</TableCell>
+              <TableCell>
+                <Badge variant={category.isActive ? "success" : "secondary"}>
+                  {category.isActive ? "Active" : "Inactive"}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuItem onClick={() => editCategory(category)}>
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => toggleStatus(category.id)}>
+                    {category.isActive ? "Deactivate" : "Activate"}
+                  </DropdownMenuItem>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+```
+
+## Add/Edit Category Modal
+
+```tsx
+function CategoryModal({ category, onClose }) {
+  const isEdit = !!category;
+  const [formData, setFormData] = useState({
+    name: category?.name ?? "",
+    description: category?.description ?? "",
+    pricePerKg: category?.pricePerKg ?? 0,
+    minWeightKg: category?.minWeightKg ?? 1,
+    maxWeightKg: category?.maxWeightKg ?? 100,
+    isActive: category?.isActive ?? true,
+  });
+
+  const mutation = useMutation({
+    mutationFn: (data) => {
+      if (isEdit) {
+        return apiFetch(`/admin/pricing/${category.id}`, {
+          method: "PATCH",
+          body: JSON.stringify(data),
+        });
+      }
+      return apiFetch("/admin/pricing", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      toast({ title: `Category ${isEdit ? "updated" : "created"}` });
+      onClose();
+    },
+  });
+
+  return (
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{isEdit ? "Edit Category" : "Add Category"}</DialogTitle>
+        </DialogHeader>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            mutation.mutate(formData);
+          }}
+          className="space-y-4"
+        >
+          <div>
+            <Label>Category Name</Label>
+            <Input
+              value={formData.name}
+              onChange={(e) =>
+                setFormData((p) => ({ ...p, name: e.target.value }))
+              }
+              placeholder="e.g., Plastic Bottles"
+            />
+          </div>
+
+          <div>
+            <Label>Description</Label>
+            <Textarea
+              value={formData.description}
+              onChange={(e) =>
+                setFormData((p) => ({ ...p, description: e.target.value }))
+              }
+              placeholder="Category description"
+            />
+          </div>
+
+          <div>
+            <Label>Price per kg (LKR)</Label>
+            <Input
+              type="number"
+              value={formData.pricePerKg}
+              onChange={(e) =>
+                setFormData((p) => ({ ...p, pricePerKg: +e.target.value }))
+              }
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Min Weight (kg)</Label>
+              <Input
+                type="number"
+                value={formData.minWeightKg}
+                onChange={(e) =>
+                  setFormData((p) => ({ ...p, minWeightKg: +e.target.value }))
+                }
+              />
+            </div>
+            <div>
+              <Label>Max Weight (kg)</Label>
+              <Input
+                type="number"
+                value={formData.maxWeightKg}
+                onChange={(e) =>
+                  setFormData((p) => ({ ...p, maxWeightKg: +e.target.value }))
+                }
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Checkbox
+              checked={formData.isActive}
+              onCheckedChange={(v) =>
+                setFormData((p) => ({ ...p, isActive: v }))
+              }
+            />
+            <Label>Active</Label>
+          </div>
+
+          <Button type="submit" disabled={mutation.isPending}>
+            {isEdit ? "Update" : "Create"} Category
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+## Waste Category Data Structure
+
+```typescript
+interface WasteCategory {
+  id: string;
+  name: string;
+  description: string;
+  pricePerKg: number;
+  minWeightKg: number;
+  maxWeightKg: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+## Default Categories
+
+| Category        | Price/kg | Min  | Max    |
+| --------------- | -------- | ---- | ------ |
+| Plastic Bottles | LKR 50   | 1 kg | 100 kg |
+| Cardboard       | LKR 30   | 2 kg | 200 kg |
+| Metal Cans      | LKR 80   | 1 kg | 50 kg  |
+| Glass Bottles   | LKR 25   | 2 kg | 100 kg |
+| Paper           | LKR 20   | 2 kg | 150 kg |
+| E-Waste         | LKR 100  | 1 kg | 50 kg  |
+
+## Related Pages
+
+<CardGroup cols={2}>
+  <Card
+    title="Dashboard"
+    icon="chart-line"
+    href="/client/pages/admin-dashboard"
+  >
+    View platform overview.
+  </Card>
+  <Card title="Bookings" icon="calendar" href="/client/pages/admin-bookings">
+    View all bookings.
+  </Card>
+</CardGroup>

@@ -1,0 +1,121 @@
+---
+title: "Client Overview"
+description: "Introduction to the Next.js frontend application"
+---
+
+## Overview
+
+The Trash2Cash client is a modern Next.js 14 application using the App Router, TypeScript, and Tailwind CSS.
+
+## Tech Stack
+
+| Technology     | Version | Purpose         |
+| -------------- | ------- | --------------- |
+| Next.js        | 14.x    | React framework |
+| TypeScript     | 5.x     | Type safety     |
+| Tailwind CSS   | 3.x     | Styling         |
+| TanStack Query | 5.x     | Server state    |
+| Lucide React   | Latest  | Icons           |
+
+## Project Structure
+
+```
+client/
+├── app/                    # App Router pages
+│   ├── globals.css        # Global styles
+│   ├── layout.tsx         # Root layout
+│   ├── page.tsx           # Home page
+│   ├── providers.tsx      # Context providers
+│   ├── admin/             # Admin section
+│   ├── driver/            # Driver section
+│   ├── login/             # Login page
+│   ├── signup/            # Signup page
+│   ├── users/             # User section
+│   └── verify/            # OTP verification
+├── components/
+│   ├── assistant/         # AI chat assistant
+│   ├── auth/              # Auth components
+│   ├── layout/            # Layout components
+│   ├── shared/            # Reusable components
+│   └── ui/                # UI primitives
+├── hooks/                 # Custom hooks
+├── lib/                   # Utilities
+│   ├── api.ts            # API client
+│   ├── auth.ts           # Auth helpers
+│   ├── types.ts          # TypeScript types
+│   └── utils.ts          # Utility functions
+└── public/               # Static assets
+```
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Server Components" icon="server">
+    Leverages Next.js 14 server components for optimal performance.
+  </Card>
+  <Card title="Type Safety" icon="shield-check">
+    Full TypeScript coverage with strict mode enabled.
+  </Card>
+  <Card title="Responsive Design" icon="mobile">
+    Mobile-first design using Tailwind CSS.
+  </Card>
+  <Card title="Dark Mode" icon="moon">
+    Built-in dark mode support with system preference detection.
+  </Card>
+</CardGroup>
+
+## Getting Started
+
+### Installation
+
+```bash
+cd client
+npm install
+```
+
+### Development
+
+```bash
+npm run dev
+```
+
+### Build
+
+```bash
+npm run build
+npm start
+```
+
+## Environment Variables
+
+Create a `.env.local` file:
+
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:4000/api
+```
+
+## Scripts
+
+| Script          | Description              |
+| --------------- | ------------------------ |
+| `npm run dev`   | Start development server |
+| `npm run build` | Build for production     |
+| `npm start`     | Start production server  |
+| `npm run lint`  | Run ESLint               |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="App Structure" icon="folder-tree" href="/client/app-structure">
+    Learn about the app router organization.
+  </Card>
+  <Card title="Components" icon="puzzle-piece" href="/client/components">
+    Explore the component library.
+  </Card>
+  <Card title="Authentication" icon="lock" href="/client/authentication">
+    Understand auth implementation.
+  </Card>
+  <Card title="User Pages" icon="user" href="/client/pages/users-dashboard">
+    Browse user-facing pages.
+  </Card>
+</CardGroup>

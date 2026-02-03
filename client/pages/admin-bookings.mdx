@@ -1,0 +1,227 @@
+---
+title: "Admin Bookings"
+description: "Booking management for administrators"
+---
+
+## Overview
+
+The Admin Bookings page (`/admin/bookings`) provides administrators with full control over all platform bookings.
+
+## Features
+
+- View all bookings across the platform
+- Filter by status, date, user, or driver
+- Assign/reassign drivers to bookings
+- Update booking status
+- Export booking data
+
+## Booking List
+
+```tsx
+// app/admin/bookings/page.tsx
+"use client";
+
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
+
+export default function AdminBookingsPage() {
+  const [filters, setFilters] = useState({
+    status: "",
+    dateFrom: "",
+    dateTo: "",
+    search: "",
+  });
+
+  const { data } = useQuery({
+    queryKey: ["admin", "bookings", filters],
+    queryFn: () =>
+      apiFetch("/admin/bookings", {
+        params: filters,
+      }),
+  });
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between">
+        <h1>All Bookings</h1>
+        <Button onClick={exportBookings}>Export CSV</Button>
+      </div>
+
+      {/* Filters */}
+      <Card>
+        <div className="flex gap-4">
+          <Select
+            value={filters.status}
+            onValueChange={(v) => setFilters((p) => ({ ...p, status: v }))}
+          >
+            <SelectItem value="">All Status</SelectItem>
+            <SelectItem value="SCHEDULED">Scheduled</SelectItem>
+            <SelectItem value="ASSIGNED">Assigned</SelectItem>
+            <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+            <SelectItem value="COMPLETED">Completed</SelectItem>
+            <SelectItem value="CANCELLED">Cancelled</SelectItem>
+          </Select>
+
+          <Input
+            type="date"
+            value={filters.dateFrom}
+            onChange={(e) =>
+              setFilters((p) => ({ ...p, dateFrom: e.target.value }))
+            }
+          />
+
+          <Input
+            type="text"
+            value={filters.search}
+            onChange={(e) =>
+              setFilters((p) => ({ ...p, search: e.target.value }))
+            }
+            placeholder="Search by user or ID"
+          />
+        </div>
+      </Card>
+
+      {/* Bookings Table */}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>ID</TableHead>
+            <TableHead>User</TableHead>
+            <TableHead>Driver</TableHead>
+            <TableHead>Waste Type</TableHead>
+            <TableHead>Weight</TableHead>
+            <TableHead>Amount</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Date</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data?.items.map((booking) => (
+            <TableRow key={booking.id}>
+              <TableCell>{booking.id.slice(0, 8)}</TableCell>
+              <TableCell>{booking.user?.fullName}</TableCell>
+              <TableCell>{booking.driver?.fullName ?? "—"}</TableCell>
+              <TableCell>{booking.wasteCategory?.name}</TableCell>
+              <TableCell>{booking.actualWeightKg ?? "—"} kg</TableCell>
+              <TableCell>LKR {booking.finalAmountLkr ?? "—"}</TableCell>
+              <TableCell>
+                <StatusPill status={booking.status} />
+              </TableCell>
+              <TableCell>
+                {new Date(booking.createdAt).toLocaleDateString()}
+              </TableCell>
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuItem onClick={() => viewDetails(booking.id)}>
+                    View Details
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => assignDriver(booking.id)}>
+                    Assign Driver
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => updateStatus(booking.id)}>
+                    Update Status
+                  </DropdownMenuItem>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
+      {/* Pagination */}
+      <Pagination
+        page={data?.page}
+        totalPages={data?.totalPages}
+        onPageChange={handlePageChange}
+      />
+    </div>
+  );
+}
+```
+
+## Assign Driver Modal
+
+```tsx
+function AssignDriverModal({ bookingId, onClose }) {
+  const { data: drivers } = useQuery({
+    queryKey: ["drivers", "available"],
+    queryFn: () => apiFetch("/admin/drivers?available=true"),
+  });
+
+  const mutation = useMutation({
+    mutationFn: (driverId) =>
+      apiFetch(`/admin/bookings/${bookingId}/assign`, {
+        method: "POST",
+        body: JSON.stringify({ driverId }),
+      }),
+    onSuccess: () => {
+      toast({ title: "Driver assigned successfully" });
+      onClose();
+    },
+  });
+
+  return (
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Assign Driver</DialogTitle>
+        </DialogHeader>
+
+        <Select onValueChange={(driverId) => mutation.mutate(driverId)}>
+          {drivers?.map((driver) => (
+            <SelectItem key={driver.id} value={driver.id}>
+              {driver.fullName} - {driver.activeBookings} active
+            </SelectItem>
+          ))}
+        </Select>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+## Booking Status Actions
+
+| Current Status | Available Actions       |
+| -------------- | ----------------------- |
+| SCHEDULED      | Assign Driver, Cancel   |
+| ASSIGNED       | Reassign, Start, Cancel |
+| IN_PROGRESS    | Complete, Cancel        |
+| COMPLETED      | —                       |
+| CANCELLED      | —                       |
+
+## Export Data
+
+Export bookings to CSV for reporting:
+
+```tsx
+const exportBookings = async () => {
+  const blob = await apiFetch("/admin/bookings/export", {
+    responseType: "blob",
+    params: filters,
+  });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `bookings-${new Date().toISOString()}.csv`;
+  a.click();
+};
+```
+
+## Related Pages
+
+<CardGroup cols={2}>
+  <Card
+    title="Dashboard"
+    icon="chart-line"
+    href="/client/pages/admin-dashboard"
+  >
+    View platform overview.
+  </Card>
+  <Card title="Drivers" icon="truck" href="/client/pages/admin-drivers">
+    Manage drivers.
+  </Card>
+</CardGroup>

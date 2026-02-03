@@ -1,0 +1,93 @@
+---
+title: "Get Notifications"
+openapi: "GET /api/notifications"
+---
+
+Get notification history for the current user.
+
+## Authorization
+
+<Info>
+  Requires authentication. Include JWT token in the Authorization header.
+</Info>
+
+```
+Authorization: Bearer <token>
+```
+
+## Query Parameters
+
+| Parameter    | Type    | Default | Description      |
+| ------------ | ------- | ------- | ---------------- |
+| `page`       | number  | 1       | Page number      |
+| `limit`      | number  | 20      | Items per page   |
+| `unreadOnly` | boolean | false   | Only show unread |
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "items": [
+        {
+          "id": "notification-uuid",
+          "title": "Booking Confirmed",
+          "body": "Your booking #12345 has been confirmed",
+          "data": {
+            "type": "BOOKING_CONFIRMED",
+            "bookingId": "booking-uuid"
+          },
+          "isRead": false,
+          "createdAt": "2024-01-25T14:30:00Z"
+        },
+        {
+          "id": "notification-uuid-2",
+          "title": "Driver Assigned",
+          "body": "John Driver has been assigned to your pickup",
+          "data": {
+            "type": "DRIVER_ASSIGNED",
+            "bookingId": "booking-uuid",
+            "driverId": "driver-uuid"
+          },
+          "isRead": true,
+          "createdAt": "2024-01-24T10:00:00Z"
+        }
+      ],
+      "total": 15,
+      "unreadCount": 3,
+      "page": 1,
+      "limit": 20,
+      "totalPages": 1
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+# Get all notifications
+curl "https://api.trash2cash.lk/api/notifications" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+# Get unread only
+curl "https://api.trash2cash.lk/api/notifications?unreadOnly=true" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+## Notification Types
+
+| Type                | Description                |
+| ------------------- | -------------------------- |
+| `BOOKING_CONFIRMED` | Booking confirmed by admin |
+| `DRIVER_ASSIGNED`   | Driver assigned to pickup  |
+| `PICKUP_STARTED`    | Driver started the pickup  |
+| `PICKUP_COMPLETED`  | Pickup completed           |
+| `BOOKING_CANCELLED` | Booking was cancelled      |
+
+## Notes
+
+- Notifications are sorted by creation date (newest first)
+- `unreadCount` shows total unread notifications
+- Use `/api/notifications/mark-read` to mark as read

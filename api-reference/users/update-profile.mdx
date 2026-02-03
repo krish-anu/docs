@@ -1,0 +1,88 @@
+---
+title: "Update Profile"
+openapi: "PATCH /api/users/me"
+---
+
+Update the current authenticated user's profile.
+
+## Authorization
+
+<Info>
+  Requires authentication. Include JWT token in the Authorization header.
+</Info>
+
+```
+Authorization: Bearer <token>
+```
+
+## Request Body
+
+```json
+{
+  "fullName": "John Updated",
+  "phone": "+94771234567",
+  "address": "456 New Street, Colombo"
+}
+```
+
+## Parameters
+
+| Field      | Type   | Required | Description          |
+| ---------- | ------ | -------- | -------------------- |
+| `fullName` | string | No       | Updated full name    |
+| `phone`    | string | No       | Updated phone number |
+| `address`  | string | No       | Updated address      |
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "id": "uuid-here",
+      "email": "user@example.com",
+      "fullName": "John Updated",
+      "phone": "+94771234567",
+      "address": "456 New Street, Colombo",
+      "role": "USER",
+      "isVerified": true,
+      "createdAt": "2024-01-15T10:30:00Z",
+      "updatedAt": "2024-01-25T09:15:00Z"
+    }
+    ```
+  </Tab>
+  <Tab title="401 Unauthorized">
+    ```json
+    {
+      "statusCode": 401,
+      "message": "Unauthorized"
+    }
+    ```
+  </Tab>
+  <Tab title="400 Bad Request">
+    ```json
+    {
+      "statusCode": 400,
+      "message": ["fullName must be a string"]
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+curl -X PATCH https://api.trash2cash.lk/api/users/me \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "fullName": "John Updated",
+    "address": "456 New Street, Colombo"
+  }'
+```
+
+## Notes
+
+- Only provided fields will be updated
+- Email and role cannot be changed via this endpoint
+- Returns the complete updated user profile

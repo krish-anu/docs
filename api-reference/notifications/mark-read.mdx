@@ -1,0 +1,86 @@
+---
+title: "Mark as Read"
+openapi: "POST /api/notifications/mark-read"
+---
+
+Mark notifications as read.
+
+## Authorization
+
+<Info>
+  Requires authentication. Include JWT token in the Authorization header.
+</Info>
+
+```
+Authorization: Bearer <token>
+```
+
+## Request Body
+
+```json
+{
+  "notificationIds": ["notification-uuid-1", "notification-uuid-2"]
+}
+```
+
+Or mark all as read:
+
+```json
+{
+  "all": true
+}
+```
+
+## Parameters
+
+| Field             | Type     | Required | Description                    |
+| ----------------- | -------- | -------- | ------------------------------ |
+| `notificationIds` | string[] | No       | IDs to mark as read            |
+| `all`             | boolean  | No       | Mark all notifications as read |
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "message": "Notifications marked as read",
+      "count": 2
+    }
+    ```
+  </Tab>
+  <Tab title="400 Bad Request">
+    ```json
+    {
+      "statusCode": 400,
+      "message": "Provide notificationIds or set all to true"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Examples
+
+### Mark Specific Notifications
+
+```bash
+curl -X POST "https://api.trash2cash.lk/api/notifications/mark-read" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -H "Content-Type: application/json" \
+  -d '{ "notificationIds": ["uuid-1", "uuid-2"] }'
+```
+
+### Mark All as Read
+
+```bash
+curl -X POST "https://api.trash2cash.lk/api/notifications/mark-read" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -H "Content-Type: application/json" \
+  -d '{ "all": true }'
+```
+
+## Notes
+
+- Only marks notifications belonging to the current user
+- Returns count of actually updated notifications
+- Already-read notifications are not counted

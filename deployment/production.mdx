@@ -1,0 +1,316 @@
+---
+title: "Production Deployment"
+description: "Deploy Trash2Cash to production"
+---
+
+## Overview
+
+This guide covers deploying Trash2Cash to production environments including cloud platforms and VPS.
+
+## Pre-Deployment Checklist
+
+<Steps>
+  <Step title="Environment Variables">
+    All production environment variables are set
+  </Step>
+  <Step title="Database">PostgreSQL is provisioned and accessible</Step>
+  <Step title="SSL/TLS">SSL certificates are configured</Step>
+  <Step title="Domain">DNS records point to your servers</Step>
+  <Step title="Secrets">JWT secret and VAPID keys are generated</Step>
+</Steps>
+
+## Deployment Options
+
+### Option 1: Docker on VPS
+
+Deploy to any VPS provider (DigitalOcean, AWS EC2, Linode, etc.)
+
+```bash
+# SSH into your server
+ssh user@your-server.com
+
+# Clone repository
+git clone https://github.com/your-org/trash2cash.git
+cd trash2cash
+
+# Create production env file
+cp .env.example .env
+nano .env  # Edit with production values
+
+# Build and run
+docker compose -f docker-compose.prod.yml up -d
+
+# Run migrations
+docker compose exec server npx prisma migrate deploy
+
+# Seed initial data
+docker compose exec server npx prisma db seed
+```
+
+### Option 2: Vercel + Railway
+
+**Client on Vercel:**
+
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy client
+cd client
+vercel --prod
+```
+
+Configure environment variables in Vercel dashboard:
+
+- `NEXT_PUBLIC_API_URL`
+- `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
+
+**Server on Railway:**
+
+1. Connect GitHub repository
+2. Set root directory to `/server`
+3. Add environment variables
+4. Deploy
+
+### Option 3: AWS
+
+**Architecture:**
+
+- ECS/Fargate for containers
+- RDS for PostgreSQL
+- ElastiCache for Redis
+- ALB for load balancing
+- CloudFront for CDN
+
+```yaml
+# AWS Copilot manifest
+name: trash2cash-server
+type: Backend Service
+http:
+  path: "/api"
+  healthcheck: "/api/health"
+image:
+  build: ./server/Dockerfile
+cpu: 512
+memory: 1024
+count: 2
+variables:
+  NODE_ENV: production
+secrets:
+  DATABASE_URL: /copilot/${COPILOT_APPLICATION}/${COPILOT_ENVIRONMENT}/secrets/DATABASE_URL
+  JWT_SECRET: /copilot/${COPILOT_APPLICATION}/${COPILOT_ENVIRONMENT}/secrets/JWT_SECRET
+```
+
+## Production docker-compose.prod.yml
+
+```yaml
+version: "3.8"
+
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+      target: production
+    restart: always
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      CLIENT_URL: ${CLIENT_URL}
+      REDIS_URL: ${REDIS_URL}
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test:
+        ["CMD", "wget", "-q", "--spider", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      target: production
+    restart: always
+    environment:
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
+```
+
+## Nginx Reverse Proxy
+
+```nginx
+# /etc/nginx/sites-available/trash2cash
+server {
+    listen 80;
+    server_name trash2cash.lk www.trash2cash.lk;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name trash2cash.lk www.trash2cash.lk;
+
+    ssl_certificate /etc/letsencrypt/live/trash2cash.lk/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/trash2cash.lk/privkey.pem;
+
+    # Client (Next.js)
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # API
+    location /api {
+        proxy_pass http://localhost:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+## SSL with Let's Encrypt
+
+```bash
+# Install certbot
+sudo apt install certbot python3-certbot-nginx
+
+# Obtain certificate
+sudo certbot --nginx -d trash2cash.lk -d www.trash2cash.lk
+
+# Auto-renewal (runs automatically)
+sudo certbot renew --dry-run
+```
+
+## Database Backups
+
+### Automated Backup Script
+
+```bash
+#!/bin/bash
+# /scripts/backup-db.sh
+
+DATE=$(date +%Y-%m-%d_%H-%M-%S)
+BACKUP_DIR=/backups
+S3_BUCKET=trash2cash-backups
+
+# Create backup
+docker compose exec -T postgres pg_dump -U trash2cash trash2cash | gzip > $BACKUP_DIR/backup_$DATE.sql.gz
+
+# Upload to S3
+aws s3 cp $BACKUP_DIR/backup_$DATE.sql.gz s3://$S3_BUCKET/
+
+# Keep only last 7 days locally
+find $BACKUP_DIR -mtime +7 -delete
+```
+
+### Cron Job
+
+```bash
+# Run daily at 2 AM
+0 2 * * * /scripts/backup-db.sh
+```
+
+## Monitoring
+
+### Health Check Endpoint
+
+```typescript
+// server/src/app.controller.ts
+@Get('health')
+@Public()
+healthCheck() {
+  return {
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  };
+}
+```
+
+### PM2 for Process Management
+
+```bash
+# Install PM2
+npm install -g pm2
+
+# Start server
+pm2 start dist/main.js --name trash2cash-server
+
+# Monitor
+pm2 monit
+
+# Logs
+pm2 logs
+
+# Auto-restart on crash
+pm2 startup
+pm2 save
+```
+
+## CI/CD Pipeline
+
+### GitHub Actions
+
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/trash2cash
+            git pull origin main
+            docker compose -f docker-compose.prod.yml build
+            docker compose -f docker-compose.prod.yml up -d
+            docker compose exec -T server npx prisma migrate deploy
+```
+
+## Security Hardening
+
+1. **Firewall** - Only allow ports 80, 443, and SSH
+2. **Rate Limiting** - Configure in Nginx or use NestJS throttler
+3. **Helmet** - Already configured for security headers
+4. **CORS** - Restrict to production domain only
+5. **Secrets** - Use environment variables, never hardcode
+
+## Related Pages
+
+<CardGroup cols={2}>
+  <Card title="Docker" icon="docker" href="/deployment/docker">
+    Docker setup guide.
+  </Card>
+  <Card
+    title="Environment Variables"
+    icon="key"
+    href="/deployment/environment-variables"
+  >
+    Required configuration.
+  </Card>
+</CardGroup>

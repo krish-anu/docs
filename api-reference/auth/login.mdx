@@ -1,0 +1,91 @@
+---
+title: "Login"
+openapi: "POST /api/auth/login"
+---
+
+Authenticate a user and receive a JWT token.
+
+## Request Body
+
+```json
+{
+  "email": "user@example.com",
+  "password": "SecurePassword123"
+}
+```
+
+## Parameters
+
+| Field      | Type   | Required | Description              |
+| ---------- | ------ | -------- | ------------------------ |
+| `email`    | string | Yes      | Registered email address |
+| `password` | string | Yes      | User's password          |
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "user": {
+        "id": "uuid-here",
+        "email": "user@example.com",
+        "fullName": "John Doe",
+        "phone": "+94771234567",
+        "role": "USER",
+        "isVerified": true,
+        "createdAt": "2024-01-15T10:30:00Z"
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="401 Unauthorized">
+    ```json
+    {
+      "statusCode": 401,
+      "message": "Invalid credentials"
+    }
+    ```
+  </Tab>
+  <Tab title="403 Forbidden">
+    ```json
+    {
+      "statusCode": 403,
+      "message": "Please verify your email first"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+curl -X POST https://api.trash2cash.lk/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "SecurePassword123"
+  }'
+```
+
+## Using the Token
+
+Include the token in the `Authorization` header for authenticated requests:
+
+```bash
+curl https://api.trash2cash.lk/api/users/me \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+## Token Details
+
+- **Algorithm**: HS256
+- **Expiration**: 7 days
+- **Payload**: Contains user ID (`sub` claim)
+
+## Notes
+
+- Users must verify their email before logging in
+- Token should be stored securely on the client (localStorage or httpOnly cookie)
+- Redirect users based on their `role` after login

@@ -1,0 +1,69 @@
+---
+title: "Waste Categories"
+openapi: "GET /api/bookings/categories"
+---
+
+Get all available waste categories with pricing.
+
+## Authorization
+
+<Info>This endpoint is public. No authentication required.</Info>
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    [
+      {
+        "id": "cat-plastic-uuid",
+        "name": "Plastic",
+        "description": "PET bottles, containers, packaging materials",
+        "pricePerKg": 50.00,
+        "isActive": true
+      },
+      {
+        "id": "cat-paper-uuid",
+        "name": "Paper",
+        "description": "Newspapers, cardboard, office paper",
+        "pricePerKg": 30.00,
+        "isActive": true
+      },
+      {
+        "id": "cat-metal-uuid",
+        "name": "Metal",
+        "description": "Aluminum cans, steel, copper",
+        "pricePerKg": 100.00,
+        "isActive": true
+      },
+      {
+        "id": "cat-glass-uuid",
+        "name": "Glass",
+        "description": "Bottles, jars, containers",
+        "pricePerKg": 25.00,
+        "isActive": true
+      },
+      {
+        "id": "cat-ewaste-uuid",
+        "name": "E-Waste",
+        "description": "Electronics, batteries, cables",
+        "pricePerKg": 150.00,
+        "isActive": true
+      }
+    ]
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+curl "https://api.trash2cash.lk/api/bookings/categories"
+```
+
+## Notes
+
+- Only active categories are returned
+- Prices are in LKR (Sri Lankan Rupees) per kilogram
+- Use the `id` when creating a booking
+- Admins can update pricing via `/api/admin/pricing`

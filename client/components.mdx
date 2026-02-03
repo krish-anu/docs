@@ -1,0 +1,249 @@
+---
+title: "Components"
+description: "Reusable UI components in the client application"
+---
+
+## Component Organization
+
+```
+components/
+├── assistant/           # AI chat assistant
+│   └── AssistantChatbox.tsx
+├── auth/                # Authentication
+│   ├── auth-layout.tsx
+│   ├── auth-provider.tsx
+│   └── require-auth.tsx
+├── layout/              # Layout components
+│   ├── app-shell.tsx
+│   └── sidebar.tsx
+├── shared/              # Shared components
+│   ├── kpi-card.tsx
+│   ├── section-heading.tsx
+│   └── status-pill.tsx
+└── ui/                  # UI primitives
+    ├── badge.tsx
+    ├── button.tsx
+    ├── card.tsx
+    ├── checkbox.tsx
+    ├── dropdown-menu.tsx
+    ├── input.tsx
+    ├── label.tsx
+    ├── table.tsx
+    ├── tabs.tsx
+    ├── textarea.tsx
+    ├── theme-toggle.tsx
+    ├── toast.tsx
+    ├── toaster.tsx
+    └── use-toast.tsx
+```
+
+## UI Components
+
+### Button
+
+```tsx
+import { Button } from "@/components/ui/button";
+
+<Button variant="default">Primary</Button>
+<Button variant="outline">Outline</Button>
+<Button variant="ghost">Ghost</Button>
+<Button variant="destructive">Delete</Button>
+<Button size="sm">Small</Button>
+<Button size="lg">Large</Button>
+```
+
+### Card
+
+```tsx
+import { Card } from "@/components/ui/card";
+
+<Card className="p-6">
+  <h3>Card Title</h3>
+  <p>Card content goes here</p>
+</Card>;
+```
+
+### Table
+
+```tsx
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+<Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Name</TableHead>
+      <TableHead>Status</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell>Item 1</TableCell>
+      <TableCell>Active</TableCell>
+    </TableRow>
+  </TableBody>
+</Table>;
+```
+
+### Input
+
+```tsx
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+<div className="space-y-2">
+  <Label htmlFor="email">Email</Label>
+  <Input id="email" type="email" placeholder="Enter email" />
+</div>;
+```
+
+## Shared Components
+
+### KPI Card
+
+Display key metrics on dashboards:
+
+```tsx
+import { KpiCard } from "@/components/shared/kpi-card";
+
+<KpiCard label="Total Earned" value="LKR 5,000" helper="Lifetime earnings" />;
+```
+
+### Status Pill
+
+Show booking or user status:
+
+```tsx
+import { StatusPill } from "@/components/shared/status-pill";
+
+<StatusPill status="SCHEDULED" />
+<StatusPill status="COMPLETED" />
+<StatusPill status="CANCELLED" />
+```
+
+### Section Heading
+
+Page section headers:
+
+```tsx
+import { SectionHeading } from "@/components/shared/section-heading";
+
+<SectionHeading
+  title="Recent Bookings"
+  description="Your latest waste pickups"
+/>;
+```
+
+## Layout Components
+
+### App Shell
+
+Main layout wrapper with sidebar:
+
+```tsx
+import { AppShell } from "@/components/layout/app-shell";
+
+<AppShell>
+  <Sidebar role="user" />
+  <main>{children}</main>
+</AppShell>;
+```
+
+### Sidebar
+
+Navigation sidebar:
+
+```tsx
+import { Sidebar } from "@/components/layout/sidebar";
+
+<Sidebar role="user" />  // User navigation
+<Sidebar role="admin" /> // Admin navigation
+<Sidebar role="driver" /> // Driver navigation
+```
+
+## Auth Components
+
+### RequireAuth
+
+Protect routes by role:
+
+```tsx
+import { RequireAuth } from "@/components/auth/require-auth";
+
+<RequireAuth allowedRoles={["USER", "ADMIN"]}>
+  <ProtectedContent />
+</RequireAuth>;
+```
+
+### AuthProvider
+
+Provides auth context:
+
+```tsx
+import { AuthProvider, useAuth } from "@/components/auth/auth-provider";
+
+// In root layout
+<AuthProvider>{children}</AuthProvider>;
+
+// In components
+const { user, isAuthenticated, logout } = useAuth();
+```
+
+## AI Assistant
+
+### AssistantChatbox
+
+Floating chat assistant:
+
+```tsx
+import AssistantChatbox from "@/components/assistant/AssistantChatbox";
+
+// Typically included in root layout
+<AssistantChatbox />;
+```
+
+Features:
+
+- Page-aware context
+- Markdown rendering
+- Persistent chat history
+- Keyboard shortcuts (Escape to close)
+
+## Toast Notifications
+
+```tsx
+import { useToast } from "@/components/ui/use-toast";
+
+const { toast } = useToast();
+
+toast({
+  title: "Success",
+  description: "Your booking has been created.",
+});
+
+toast({
+  title: "Error",
+  description: "Something went wrong.",
+  variant: "destructive",
+});
+```
+
+## Theme Toggle
+
+```tsx
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+
+<ThemeToggle />;
+```
+
+Supports:
+
+- Light mode
+- Dark mode
+- System preference

@@ -1,0 +1,279 @@
+---
+title: "User Bookings"
+description: "Booking management for users"
+---
+
+## Overview
+
+The Bookings section (`/users/bookings`) allows users to create, view, and manage their waste pickup bookings.
+
+## Routes
+
+| Route                  | Description          |
+| ---------------------- | -------------------- |
+| `/users/bookings`      | List all bookings    |
+| `/users/bookings/new`  | Create new booking   |
+| `/users/bookings/[id]` | View booking details |
+
+## Booking List
+
+Display all user bookings with filtering and sorting:
+
+```tsx
+// app/users/bookings/page.tsx
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { StatusPill } from "@/components/shared/status-pill";
+
+export default function BookingsPage() {
+  const { data } = useQuery({
+    queryKey: ["bookings"],
+    queryFn: () => apiFetch<{ items: Booking[] }>("/bookings"),
+  });
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between">
+        <h1>My Bookings</h1>
+        <Button asChild>
+          <Link href="/users/bookings/new">+ New Booking</Link>
+        </Button>
+      </div>
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>ID</TableHead>
+            <TableHead>Waste Type</TableHead>
+            <TableHead>Weight</TableHead>
+            <TableHead>Amount</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Date</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data?.items.map((booking) => (
+            <TableRow key={booking.id}>
+              <TableCell>
+                <Link href={`/users/bookings/${booking.id}`}>
+                  {booking.id.slice(0, 8)}
+                </Link>
+              </TableCell>
+              <TableCell>{booking.wasteCategory?.name}</TableCell>
+              <TableCell>{booking.actualWeightKg ?? "-"} kg</TableCell>
+              <TableCell>
+                LKR {booking.finalAmountLkr ?? booking.estimatedMaxAmount}
+              </TableCell>
+              <TableCell>
+                <StatusPill status={booking.status} />
+              </TableCell>
+              <TableCell>
+                {new Date(booking.createdAt).toLocaleDateString()}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+```
+
+## Create Booking
+
+```tsx
+// app/users/bookings/new/page.tsx
+"use client";
+
+import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
+import { useRouter } from "next/navigation";
+
+export default function NewBookingPage() {
+  const router = useRouter();
+  const [formData, setFormData] = useState({
+    wasteCategoryId: "",
+    estimatedWeightKg: 0,
+    address: "",
+    scheduledDate: "",
+    notes: "",
+  });
+
+  const { data: categories } = useQuery({
+    queryKey: ["waste-categories"],
+    queryFn: () => apiFetch("/public/waste-categories"),
+  });
+
+  const mutation = useMutation({
+    mutationFn: (data) =>
+      apiFetch("/bookings", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    onSuccess: (booking) => {
+      router.push(`/users/bookings/${booking.id}`);
+    },
+  });
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        mutation.mutate(formData);
+      }}
+    >
+      <h1>New Booking</h1>
+
+      {/* Waste Category Select */}
+      <Select
+        value={formData.wasteCategoryId}
+        onValueChange={(v) =>
+          setFormData((p) => ({ ...p, wasteCategoryId: v }))
+        }
+      >
+        {categories?.map((cat) => (
+          <SelectItem key={cat.id} value={cat.id}>
+            {cat.name} - LKR {cat.pricePerKg}/kg
+          </SelectItem>
+        ))}
+      </Select>
+
+      {/* Weight Input */}
+      <Input
+        type="number"
+        value={formData.estimatedWeightKg}
+        onChange={(e) =>
+          setFormData((p) => ({ ...p, estimatedWeightKg: +e.target.value }))
+        }
+        placeholder="Estimated weight (kg)"
+      />
+
+      {/* Address */}
+      <Textarea
+        value={formData.address}
+        onChange={(e) =>
+          setFormData((p) => ({ ...p, address: e.target.value }))
+        }
+        placeholder="Pickup address"
+      />
+
+      {/* Schedule Date */}
+      <Input
+        type="datetime-local"
+        value={formData.scheduledDate}
+        onChange={(e) =>
+          setFormData((p) => ({ ...p, scheduledDate: e.target.value }))
+        }
+      />
+
+      <Button type="submit" disabled={mutation.isPending}>
+        {mutation.isPending ? "Creating..." : "Create Booking"}
+      </Button>
+    </form>
+  );
+}
+```
+
+## Booking Status
+
+| Status        | Description                                 |
+| ------------- | ------------------------------------------- |
+| `SCHEDULED`   | Booking created, awaiting driver assignment |
+| `ASSIGNED`    | Driver assigned, awaiting pickup            |
+| `IN_PROGRESS` | Driver en route or collecting               |
+| `COMPLETED`   | Pickup completed, payment processed         |
+| `CANCELLED`   | Booking cancelled by user or admin          |
+
+## Booking Details
+
+```tsx
+// app/users/bookings/[id]/page.tsx
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
+
+export default function BookingDetailPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const { data: booking } = useQuery({
+    queryKey: ["booking", params.id],
+    queryFn: () => apiFetch(`/bookings/${params.id}`),
+  });
+
+  return (
+    <div>
+      <h1>Booking #{booking?.id.slice(0, 8)}</h1>
+
+      <Card>
+        <dl>
+          <dt>Status</dt>
+          <dd>
+            <StatusPill status={booking?.status} />
+          </dd>
+
+          <dt>Waste Type</dt>
+          <dd>{booking?.wasteCategory?.name}</dd>
+
+          <dt>Weight</dt>
+          <dd>{booking?.actualWeightKg ?? booking?.estimatedWeightKg} kg</dd>
+
+          <dt>Amount</dt>
+          <dd>LKR {booking?.finalAmountLkr ?? booking?.estimatedMaxAmount}</dd>
+
+          <dt>Address</dt>
+          <dd>{booking?.address}</dd>
+
+          <dt>Scheduled</dt>
+          <dd>{new Date(booking?.scheduledDate).toLocaleString()}</dd>
+
+          {booking?.driver && (
+            <>
+              <dt>Driver</dt>
+              <dd>{booking.driver.fullName}</dd>
+            </>
+          )}
+        </dl>
+      </Card>
+
+      {booking?.status === "SCHEDULED" && (
+        <Button variant="destructive" onClick={handleCancel}>
+          Cancel Booking
+        </Button>
+      )}
+    </div>
+  );
+}
+```
+
+## Related Pages
+
+<CardGroup cols={2}>
+  <Card
+    title="Dashboard"
+    icon="chart-line"
+    href="/client/pages/users-dashboard"
+  >
+    View summary statistics.
+  </Card>
+  <Card
+    title="Pending Pickups"
+    icon="clock"
+    href="/client/pages/users-pending-pickups"
+  >
+    View upcoming scheduled pickups.
+  </Card>
+</CardGroup>

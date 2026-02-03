@@ -1,0 +1,245 @@
+---
+title: "Admin Drivers"
+description: "Driver management for administrators"
+---
+
+## Overview
+
+The Admin Drivers page (`/admin/drivers`) allows administrators to manage driver accounts and monitor their activity.
+
+## Features
+
+- View all registered drivers
+- Add new drivers
+- Activate/deactivate driver accounts
+- View driver performance metrics
+- Assign bookings to drivers
+
+## Driver List
+
+```tsx
+// app/admin/drivers/page.tsx
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
+
+export default function AdminDriversPage() {
+  const { data } = useQuery({
+    queryKey: ["admin", "drivers"],
+    queryFn: () => apiFetch("/admin/drivers"),
+  });
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between">
+        <h1>Drivers</h1>
+        <Button onClick={() => setShowAddModal(true)}>+ Add Driver</Button>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <KpiCard label="Total Drivers" value={data?.total} />
+        <KpiCard label="Active" value={data?.active} />
+        <KpiCard label="On Duty" value={data?.onDuty} />
+        <KpiCard label="Avg Rating" value={data?.avgRating} />
+      </div>
+
+      {/* Drivers Table */}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Phone</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Active Bookings</TableHead>
+            <TableHead>Total Completed</TableHead>
+            <TableHead>Rating</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data?.items.map((driver) => (
+            <TableRow key={driver.id}>
+              <TableCell>{driver.fullName}</TableCell>
+              <TableCell>{driver.email}</TableCell>
+              <TableCell>{driver.phone}</TableCell>
+              <TableCell>
+                <Badge variant={driver.isActive ? "success" : "secondary"}>
+                  {driver.isActive ? "Active" : "Inactive"}
+                </Badge>
+              </TableCell>
+              <TableCell>{driver.activeBookings}</TableCell>
+              <TableCell>{driver.completedBookings}</TableCell>
+              <TableCell>⭐ {driver.rating?.toFixed(1) ?? "—"}</TableCell>
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuItem onClick={() => viewProfile(driver.id)}>
+                    View Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => toggleStatus(driver.id)}>
+                    {driver.isActive ? "Deactivate" : "Activate"}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => viewBookings(driver.id)}>
+                    View Bookings
+                  </DropdownMenuItem>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+```
+
+## Add Driver
+
+```tsx
+function AddDriverModal({ onClose }) {
+  const [formData, setFormData] = useState({
+    email: "",
+    fullName: "",
+    phone: "",
+    password: "",
+  });
+
+  const mutation = useMutation({
+    mutationFn: (data) =>
+      apiFetch("/admin/drivers", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      toast({ title: "Driver added successfully" });
+      onClose();
+    },
+  });
+
+  return (
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add New Driver</DialogTitle>
+        </DialogHeader>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            mutation.mutate(formData);
+          }}
+        >
+          <Input
+            value={formData.fullName}
+            onChange={(e) =>
+              setFormData((p) => ({ ...p, fullName: e.target.value }))
+            }
+            placeholder="Full Name"
+          />
+          <Input
+            type="email"
+            value={formData.email}
+            onChange={(e) =>
+              setFormData((p) => ({ ...p, email: e.target.value }))
+            }
+            placeholder="Email"
+          />
+          <Input
+            value={formData.phone}
+            onChange={(e) =>
+              setFormData((p) => ({ ...p, phone: e.target.value }))
+            }
+            placeholder="Phone Number"
+          />
+          <Input
+            type="password"
+            value={formData.password}
+            onChange={(e) =>
+              setFormData((p) => ({ ...p, password: e.target.value }))
+            }
+            placeholder="Initial Password"
+          />
+
+          <Button type="submit" disabled={mutation.isPending}>
+            Add Driver
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+## Driver Profile View
+
+```tsx
+function DriverProfileModal({ driverId }) {
+  const { data: driver } = useQuery({
+    queryKey: ["driver", driverId],
+    queryFn: () => apiFetch(`/admin/drivers/${driverId}`),
+  });
+
+  return (
+    <div>
+      <h2>{driver?.fullName}</h2>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <h4>Contact</h4>
+          <p>{driver?.email}</p>
+          <p>{driver?.phone}</p>
+        </Card>
+
+        <Card>
+          <h4>Performance</h4>
+          <p>Completed: {driver?.completedBookings}</p>
+          <p>Rating: ⭐ {driver?.rating}</p>
+        </Card>
+
+        <Card>
+          <h4>Status</h4>
+          <p>Active: {driver?.isActive ? "Yes" : "No"}</p>
+          <p>On Duty: {driver?.onDuty ? "Yes" : "No"}</p>
+        </Card>
+      </div>
+
+      <h3>Recent Bookings</h3>
+      {/* Driver's booking history */}
+    </div>
+  );
+}
+```
+
+## Driver Data Structure
+
+```typescript
+interface Driver {
+  id: string;
+  email: string;
+  fullName: string;
+  phone: string;
+  isActive: boolean;
+  onDuty: boolean;
+  rating: number | null;
+  activeBookings: number;
+  completedBookings: number;
+  createdAt: string;
+}
+```
+
+## Related Pages
+
+<CardGroup cols={2}>
+  <Card
+    title="Dashboard"
+    icon="chart-line"
+    href="/client/pages/admin-dashboard"
+  >
+    View platform overview.
+  </Card>
+  <Card title="Bookings" icon="calendar" href="/client/pages/admin-bookings">
+    Manage all bookings.
+  </Card>
+</CardGroup>

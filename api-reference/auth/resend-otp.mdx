@@ -1,0 +1,64 @@
+---
+title: "Resend OTP"
+openapi: "POST /api/auth/resend-otp"
+---
+
+Request a new OTP to be sent to the user's email.
+
+## Request Body
+
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+## Parameters
+
+| Field   | Type   | Required | Description              |
+| ------- | ------ | -------- | ------------------------ |
+| `email` | string | Yes      | Registered email address |
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "message": "New OTP sent to email"
+    }
+    ```
+  </Tab>
+  <Tab title="400 Bad Request">
+    ```json
+    {
+      "statusCode": 400,
+      "message": "User is already verified"
+    }
+    ```
+  </Tab>
+  <Tab title="404 Not Found">
+    ```json
+    {
+      "statusCode": 404,
+      "message": "User not found"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+curl -X POST https://api.trash2cash.lk/api/auth/resend-otp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com"
+  }'
+```
+
+## Notes
+
+- Rate limited to prevent abuse (max 3 requests per 10 minutes)
+- Only unverified users can request new OTPs
+- Previous OTP is invalidated when new one is sent

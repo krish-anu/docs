@@ -1,0 +1,83 @@
+---
+title: "List Users"
+openapi: "GET /api/admin/users"
+---
+
+Get a list of all users (admin only).
+
+## Authorization
+
+<Info>Requires ADMIN role. Include JWT token in the Authorization header.</Info>
+
+```
+Authorization: Bearer <token>
+```
+
+## Query Parameters
+
+| Parameter    | Type    | Default | Description                          |
+| ------------ | ------- | ------- | ------------------------------------ |
+| `page`       | number  | 1       | Page number                          |
+| `limit`      | number  | 10      | Items per page                       |
+| `role`       | string  | -       | Filter by role (USER, ADMIN, DRIVER) |
+| `search`     | string  | -       | Search by name or email              |
+| `isVerified` | boolean | -       | Filter by verification status        |
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "items": [
+        {
+          "id": "user-uuid",
+          "email": "user@example.com",
+          "fullName": "John Doe",
+          "phone": "+94771234567",
+          "role": "USER",
+          "isVerified": true,
+          "createdAt": "2024-01-15T10:30:00Z",
+          "_count": {
+            "bookings": 5
+          }
+        }
+      ],
+      "total": 150,
+      "page": 1,
+      "limit": 10,
+      "totalPages": 15
+    }
+    ```
+  </Tab>
+  <Tab title="403 Forbidden">
+    ```json
+    {
+      "statusCode": 403,
+      "message": "Forbidden resource"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+# Get all users
+curl "https://api.trash2cash.lk/api/admin/users" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+# Filter by role
+curl "https://api.trash2cash.lk/api/admin/users?role=DRIVER" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+# Search users
+curl "https://api.trash2cash.lk/api/admin/users?search=john" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+## Notes
+
+- Password field is never included in response
+- `_count.bookings` shows total bookings per user
+- Search matches both name and email (case-insensitive)

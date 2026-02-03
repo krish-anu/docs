@@ -1,0 +1,191 @@
+---
+title: "Driver Dashboard"
+description: "Main dashboard for drivers"
+---
+
+## Overview
+
+The Driver Dashboard (`/driver/dashboard`) provides drivers with an overview of their assigned pickups and performance metrics.
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="Today's Pickups" icon="calendar-day">
+    View pickups scheduled for today.
+  </Card>
+  <Card title="Earnings" icon="wallet">
+    Track daily, weekly, and monthly earnings.
+  </Card>
+  <Card title="Performance" icon="chart-line">
+    View completion rate and ratings.
+  </Card>
+  <Card title="Quick Actions" icon="bolt">
+    Start pickup, mark complete, navigate.
+  </Card>
+</CardGroup>
+
+## Page Structure
+
+```tsx
+// app/driver/dashboard/page.tsx
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
+import { useAuth } from "@/components/auth/auth-provider";
+
+export default function DriverDashboardPage() {
+  const { user } = useAuth();
+
+  const { data: stats } = useQuery({
+    queryKey: ["driver", "stats"],
+    queryFn: () => apiFetch("/driver/stats"),
+  });
+
+  const { data: todayPickups } = useQuery({
+    queryKey: ["driver", "pickups", "today"],
+    queryFn: () => apiFetch("/driver/pickups/today"),
+  });
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <p className="text-muted">Driver Dashboard</p>
+        <h1>Welcome, {user?.fullName}!</h1>
+      </div>
+
+      {/* Status Toggle */}
+      <Card>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3>Duty Status</h3>
+            <p>Toggle to indicate you're available for pickups</p>
+          </div>
+          <Switch checked={stats?.onDuty} onCheckedChange={toggleDutyStatus} />
+        </div>
+      </Card>
+
+      {/* KPI Cards */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <KpiCard label="Today's Pickups" value={stats?.todayPickups} />
+        <KpiCard
+          label="Today's Earnings"
+          value={`LKR ${stats?.todayEarnings}`}
+        />
+        <KpiCard label="This Week" value={`LKR ${stats?.weeklyEarnings}`} />
+        <KpiCard
+          label="Rating"
+          value={`⭐ ${stats?.rating?.toFixed(1) ?? "—"}`}
+        />
+      </div>
+
+      {/* Today's Pickups */}
+      <Card>
+        <h3>Today's Pickups ({todayPickups?.length ?? 0})</h3>
+
+        {todayPickups?.length === 0 ? (
+          <p className="text-muted">No pickups scheduled for today</p>
+        ) : (
+          <div className="space-y-4">
+            {todayPickups?.map((pickup) => (
+              <PickupCard key={pickup.id} pickup={pickup} />
+            ))}
+          </div>
+        )}
+      </Card>
+
+      {/* Quick Stats */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <h3>Monthly Performance</h3>
+          <dl>
+            <dt>Completed</dt>
+            <dd>{stats?.monthlyCompleted}</dd>
+            <dt>Completion Rate</dt>
+            <dd>{stats?.completionRate}%</dd>
+          </dl>
+        </Card>
+
+        <Card>
+          <h3>Monthly Earnings</h3>
+          <p className="text-3xl font-bold">LKR {stats?.monthlyEarnings}</p>
+        </Card>
+      </div>
+    </div>
+  );
+}
+```
+
+## Pickup Card Component
+
+```tsx
+function PickupCard({ pickup }) {
+  return (
+    <div className="border rounded-lg p-4">
+      <div className="flex justify-between items-start">
+        <div>
+          <p className="font-medium">{pickup.wasteCategory?.name}</p>
+          <p className="text-sm text-muted">{pickup.address}</p>
+          <p className="text-sm">
+            {new Date(pickup.scheduledDate).toLocaleTimeString()}
+          </p>
+        </div>
+        <StatusPill status={pickup.status} />
+      </div>
+
+      <div className="mt-4 flex gap-2">
+        {pickup.status === "ASSIGNED" && (
+          <Button onClick={() => startPickup(pickup.id)}>Start Pickup</Button>
+        )}
+        {pickup.status === "IN_PROGRESS" && (
+          <Button onClick={() => completePickup(pickup.id)}>
+            Mark Complete
+          </Button>
+        )}
+        <Button variant="outline" onClick={() => openMaps(pickup.address)}>
+          Navigate
+        </Button>
+        <Button variant="ghost" onClick={() => callUser(pickup.user?.phone)}>
+          Call User
+        </Button>
+      </div>
+    </div>
+  );
+}
+```
+
+## Duty Status Toggle
+
+```tsx
+const toggleDutyStatus = async () => {
+  await apiFetch("/driver/duty-status", {
+    method: "PATCH",
+    body: JSON.stringify({ onDuty: !stats?.onDuty }),
+  });
+  refetch();
+};
+```
+
+## Driver Stats Structure
+
+```typescript
+interface DriverStats {
+  onDuty: boolean;
+  todayPickups: number;
+  todayEarnings: number;
+  weeklyEarnings: number;
+  monthlyEarnings: number;
+  monthlyCompleted: number;
+  completionRate: number;
+  rating: number | null;
+}
+```
+
+## Related Pages
+
+<CardGroup cols={2}>
+  <Card title="Bookings" icon="calendar" href="/client/pages/driver-bookings">
+    View all assigned bookings.
+  </Card>
+</CardGroup>

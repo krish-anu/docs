@@ -1,0 +1,162 @@
+---
+title: "Pricing"
+openapi: "GET /api/admin/pricing"
+---
+
+Get and manage waste category pricing.
+
+## Get Pricing
+
+### GET /api/admin/pricing
+
+Get all waste categories with pricing.
+
+#### Authorization
+
+<Info>Requires ADMIN role. Include JWT token in the Authorization header.</Info>
+
+#### Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    [
+      {
+        "id": "cat-plastic-uuid",
+        "name": "Plastic",
+        "description": "PET bottles, containers, packaging",
+        "pricePerKg": 50.00,
+        "isActive": true,
+        "createdAt": "2024-01-01T00:00:00Z",
+        "updatedAt": "2024-01-20T10:00:00Z"
+      },
+      {
+        "id": "cat-paper-uuid",
+        "name": "Paper",
+        "description": "Newspapers, cardboard, office paper",
+        "pricePerKg": 30.00,
+        "isActive": true,
+        "createdAt": "2024-01-01T00:00:00Z",
+        "updatedAt": "2024-01-20T10:00:00Z"
+      }
+    ]
+    ```
+  </Tab>
+</Tabs>
+
+#### Example
+
+```bash
+curl "https://api.trash2cash.lk/api/admin/pricing" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+---
+
+## Update Pricing
+
+### PATCH /api/admin/pricing/{id}
+
+Update a waste category's pricing.
+
+#### Request Body
+
+```json
+{
+  "pricePerKg": 55.0,
+  "description": "Updated description",
+  "isActive": true
+}
+```
+
+#### Parameters
+
+| Field         | Type    | Required | Description             |
+| ------------- | ------- | -------- | ----------------------- |
+| `pricePerKg`  | number  | No       | New price per kg        |
+| `description` | string  | No       | Updated description     |
+| `isActive`    | boolean | No       | Enable/disable category |
+
+#### Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "id": "cat-plastic-uuid",
+      "name": "Plastic",
+      "description": "Updated description",
+      "pricePerKg": 55.00,
+      "isActive": true,
+      "updatedAt": "2024-01-25T14:30:00Z",
+      "message": "Pricing updated successfully"
+    }
+    ```
+  </Tab>
+  <Tab title="404 Not Found">
+    ```json
+    {
+      "statusCode": 404,
+      "message": "Waste category not found"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+#### Example
+
+```bash
+curl -X PATCH "https://api.trash2cash.lk/api/admin/pricing/cat-plastic-uuid" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -H "Content-Type: application/json" \
+  -d '{ "pricePerKg": 55.00 }'
+```
+
+---
+
+## Create Category
+
+### POST /api/admin/pricing
+
+Create a new waste category.
+
+#### Request Body
+
+```json
+{
+  "name": "Organic",
+  "description": "Compostable organic waste",
+  "pricePerKg": 15.0
+}
+```
+
+#### Response
+
+<Tabs>
+  <Tab title="201 Created">
+    ```json
+    {
+      "id": "cat-organic-uuid",
+      "name": "Organic",
+      "description": "Compostable organic waste",
+      "pricePerKg": 15.00,
+      "isActive": true,
+      "createdAt": "2024-01-25T14:30:00Z"
+    }
+    ```
+  </Tab>
+  <Tab title="409 Conflict">
+    ```json
+    {
+      "statusCode": 409,
+      "message": "Category with this name already exists"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Notes
+
+- Price changes don't affect existing bookings
+- Deactivating a category hides it from users but preserves history
+- Category names must be unique

@@ -1,0 +1,107 @@
+---
+title: "List Bookings"
+openapi: "GET /api/bookings"
+---
+
+Get a list of bookings for the current user.
+
+## Authorization
+
+<Info>
+  Requires authentication. Include JWT token in the Authorization header.
+</Info>
+
+```
+Authorization: Bearer <token>
+```
+
+## Query Parameters
+
+| Parameter | Type   | Default | Description           |
+| --------- | ------ | ------- | --------------------- |
+| `page`    | number | 1       | Page number           |
+| `limit`   | number | 10      | Items per page        |
+| `status`  | string | -       | Filter by status      |
+| `from`    | string | -       | Start date (ISO 8601) |
+| `to`      | string | -       | End date (ISO 8601)   |
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "items": [
+        {
+          "id": "booking-uuid",
+          "wasteCategoryId": "category-uuid",
+          "estimatedWeightKg": 10.5,
+          "actualWeightKg": 11.0,
+          "estimatedMinAmount": 472.50,
+          "estimatedMaxAmount": 577.50,
+          "finalAmount": 550.00,
+          "address": "123 Main Street, Colombo 05",
+          "scheduledDate": "2024-02-01T10:00:00Z",
+          "status": "COMPLETED",
+          "createdAt": "2024-01-25T14:30:00Z",
+          "wasteCategory": {
+            "id": "category-uuid",
+            "name": "Plastic",
+            "pricePerKg": 50.00
+          },
+          "driver": {
+            "id": "driver-uuid",
+            "fullName": "Driver Name",
+            "phone": "+94771234567"
+          }
+        }
+      ],
+      "total": 15,
+      "page": 1,
+      "limit": 10,
+      "totalPages": 2
+    }
+    ```
+  </Tab>
+  <Tab title="401 Unauthorized">
+    ```json
+    {
+      "statusCode": 401,
+      "message": "Unauthorized"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+# Get all bookings
+curl "https://api.trash2cash.lk/api/bookings" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+# Filter by status
+curl "https://api.trash2cash.lk/api/bookings?status=PENDING" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+# Paginate
+curl "https://api.trash2cash.lk/api/bookings?page=2&limit=5" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+## Status Values
+
+| Status        | Description                |
+| ------------- | -------------------------- |
+| `PENDING`     | Awaiting confirmation      |
+| `CONFIRMED`   | Confirmed, awaiting driver |
+| `ASSIGNED`    | Driver assigned            |
+| `IN_PROGRESS` | Pickup in progress         |
+| `COMPLETED`   | Pickup completed           |
+| `CANCELLED`   | Booking cancelled          |
+
+## Notes
+
+- Results are sorted by `scheduledDate` descending
+- Only returns bookings for the authenticated user
+- Admins use `/api/admin/bookings` for all bookings

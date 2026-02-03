@@ -1,0 +1,73 @@
+---
+title: "Dashboard"
+openapi: "GET /api/users/dashboard"
+---
+
+Get dashboard statistics for the current user.
+
+## Authorization
+
+<Info>
+  Requires authentication. Include JWT token in the Authorization header.
+</Info>
+
+```
+Authorization: Bearer <token>
+```
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "totalBookings": 15,
+      "completedBookings": 12,
+      "pendingBookings": 2,
+      "totalEarnings": 4500.00,
+      "totalWeightKg": 125.5,
+      "wasteBreakdown": [
+        { "category": "Plastic", "weight": 45.0, "amount": 2250.00 },
+        { "category": "Paper", "weight": 30.0, "amount": 900.00 },
+        { "category": "Metal", "weight": 25.5, "amount": 2550.00 },
+        { "category": "Glass", "weight": 25.0, "amount": 625.00 }
+      ],
+      "recentBookings": [
+        {
+          "id": "booking-uuid",
+          "wasteCategory": { "name": "Plastic" },
+          "status": "COMPLETED",
+          "finalAmount": 250.00,
+          "scheduledDate": "2024-01-20T10:00:00Z"
+        }
+      ],
+      "monthlyStats": [
+        { "month": "Jan", "bookings": 3, "earnings": 1500 },
+        { "month": "Feb", "bookings": 5, "earnings": 2200 }
+      ]
+    }
+    ```
+  </Tab>
+  <Tab title="401 Unauthorized">
+    ```json
+    {
+      "statusCode": 401,
+      "message": "Unauthorized"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+curl https://api.trash2cash.lk/api/users/dashboard \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+## Notes
+
+- Statistics are calculated from all-time user data
+- `recentBookings` returns the last 5 bookings
+- `monthlyStats` shows data for the current year
+- Amounts are in LKR (Sri Lankan Rupees)

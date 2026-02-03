@@ -1,0 +1,81 @@
+---
+title: "Admin Dashboard"
+openapi: "GET /api/admin/dashboard"
+---
+
+Get dashboard statistics for administrators.
+
+## Authorization
+
+<Info>Requires ADMIN role. Include JWT token in the Authorization header.</Info>
+
+```
+Authorization: Bearer <token>
+```
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "totalUsers": 150,
+      "totalDrivers": 12,
+      "totalBookings": 450,
+      "pendingBookings": 25,
+      "completedBookings": 380,
+      "totalRevenue": 125000.00,
+      "totalWeightCollected": 2500.5,
+      "todayBookings": 8,
+      "todayRevenue": 3500.00,
+      "recentBookings": [
+        {
+          "id": "booking-uuid",
+          "user": { "fullName": "John Doe" },
+          "wasteCategory": { "name": "Plastic" },
+          "status": "PENDING",
+          "estimatedWeightKg": 10.5,
+          "scheduledDate": "2024-02-01T10:00:00Z"
+        }
+      ],
+      "wasteBreakdown": [
+        { "category": "Plastic", "weight": 1000.0, "percentage": 40 },
+        { "category": "Paper", "weight": 625.0, "percentage": 25 },
+        { "category": "Metal", "weight": 500.0, "percentage": 20 },
+        { "category": "Glass", "weight": 250.0, "percentage": 10 },
+        { "category": "E-Waste", "weight": 125.5, "percentage": 5 }
+      ],
+      "monthlyStats": [
+        { "month": "Jan", "bookings": 80, "revenue": 20000 },
+        { "month": "Feb", "bookings": 95, "revenue": 25000 }
+      ],
+      "topDrivers": [
+        { "id": "driver-uuid", "fullName": "Driver 1", "completedPickups": 50 },
+        { "id": "driver-uuid", "fullName": "Driver 2", "completedPickups": 45 }
+      ]
+    }
+    ```
+  </Tab>
+  <Tab title="403 Forbidden">
+    ```json
+    {
+      "statusCode": 403,
+      "message": "Forbidden resource"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+curl "https://api.trash2cash.lk/api/admin/dashboard" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+## Notes
+
+- Only accessible by users with ADMIN role
+- Statistics are calculated in real-time
+- `monthlyStats` shows current year data
+- `topDrivers` shows top 5 drivers by completed pickups

@@ -1,0 +1,291 @@
+---
+title: "Docker"
+description: "Docker and Docker Compose setup for Trash2Cash"
+---
+
+## Overview
+
+Trash2Cash uses Docker Compose to orchestrate all services including the client, server, PostgreSQL, and Redis.
+
+## Docker Compose Configuration
+
+```yaml
+# docker-compose.yml
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: trash2cash-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-trash2cash}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-trash2cash}
+      POSTGRES_DB: ${POSTGRES_DB:-trash2cash}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-trash2cash}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: trash2cash-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: trash2cash-server
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-trash2cash}:${POSTGRES_PASSWORD:-trash2cash}@postgres:5432/${POSTGRES_DB:-trash2cash}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:3000}
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: trash2cash-client
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001/api}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+      - /app/.next
+
+volumes:
+  postgres_data:
+  redis_data:
+```
+
+## Server Dockerfile
+
+```dockerfile
+# server/Dockerfile
+FROM node:20-alpine AS base
+
+WORKDIR /app
+
+# Install dependencies
+FROM base AS deps
+COPY package*.json ./
+RUN npm ci
+
+# Development
+FROM base AS dev
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN npx prisma generate
+CMD ["npm", "run", "start:dev"]
+
+# Build
+FROM base AS builder
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN npx prisma generate
+RUN npm run build
+
+# Production
+FROM base AS production
+ENV NODE_ENV=production
+
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma ./prisma
+COPY package*.json ./
+
+EXPOSE 3001
+CMD ["npm", "run", "start:prod"]
+```
+
+## Client Dockerfile
+
+```dockerfile
+# client/Dockerfile
+FROM node:20-alpine AS base
+
+WORKDIR /app
+
+# Install dependencies
+FROM base AS deps
+COPY package*.json ./
+RUN npm ci
+
+# Development
+FROM base AS dev
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+CMD ["npm", "run", "dev"]
+
+# Build
+FROM base AS builder
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN npm run build
+
+# Production
+FROM base AS production
+ENV NODE_ENV=production
+
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+
+EXPOSE 3000
+CMD ["node", "server.js"]
+```
+
+## Running with Docker Compose
+
+### Development Mode
+
+```bash
+# Start all services
+docker compose up -d
+
+# View logs
+docker compose logs -f
+
+# Stop services
+docker compose down
+```
+
+### Production Mode
+
+```bash
+# Build for production
+docker compose -f docker-compose.prod.yml build
+
+# Start production
+docker compose -f docker-compose.prod.yml up -d
+```
+
+## Database Operations
+
+### Run Migrations
+
+```bash
+# Run migrations inside container
+docker compose exec server npx prisma migrate deploy
+```
+
+### Seed Database
+
+```bash
+docker compose exec server npx prisma db seed
+```
+
+### Access Prisma Studio
+
+```bash
+docker compose exec server npx prisma studio
+```
+
+### Database Backup
+
+```bash
+# Backup
+docker compose exec postgres pg_dump -U trash2cash trash2cash > backup.sql
+
+# Restore
+cat backup.sql | docker compose exec -T postgres psql -U trash2cash trash2cash
+```
+
+## Container Management
+
+### View Running Containers
+
+```bash
+docker compose ps
+```
+
+### Restart a Service
+
+```bash
+docker compose restart server
+```
+
+### Rebuild a Service
+
+```bash
+docker compose build server
+docker compose up -d server
+```
+
+### Clean Up
+
+```bash
+# Remove containers and volumes
+docker compose down -v
+
+# Remove images
+docker compose down --rmi all
+```
+
+## Troubleshooting
+
+### Check Service Health
+
+```bash
+docker compose ps
+docker compose logs server
+docker compose logs postgres
+```
+
+### Connect to Database
+
+```bash
+docker compose exec postgres psql -U trash2cash -d trash2cash
+```
+
+### Check Redis
+
+```bash
+docker compose exec redis redis-cli
+> PING
+> KEYS *
+```
+
+## Related Pages
+
+<CardGroup cols={2}>
+  <Card
+    title="Environment Variables"
+    icon="key"
+    href="/deployment/environment-variables"
+  >
+    Required environment configuration.
+  </Card>
+  <Card title="Production" icon="rocket" href="/deployment/production">
+    Production deployment guide.
+  </Card>
+</CardGroup>

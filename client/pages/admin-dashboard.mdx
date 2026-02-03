@@ -1,0 +1,139 @@
+---
+title: "Admin Dashboard"
+description: "Platform overview and statistics for administrators"
+---
+
+## Overview
+
+The Admin Dashboard (`/admin/dashboard`) provides administrators with a comprehensive view of platform activity, user statistics, and key performance indicators.
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="Platform Stats" icon="chart-pie">
+    Total users, bookings, revenue, and growth metrics.
+  </Card>
+  <Card title="Recent Activity" icon="activity">
+    Latest bookings, user registrations, and driver activity.
+  </Card>
+  <Card title="Quick Actions" icon="bolt">
+    Shortcuts to common admin tasks.
+  </Card>
+  <Card title="System Health" icon="heart-pulse">
+    API status and system monitoring.
+  </Card>
+</CardGroup>
+
+## KPI Metrics
+
+| Metric          | Description                      |
+| --------------- | -------------------------------- |
+| Total Users     | Number of registered users       |
+| Total Drivers   | Number of active drivers         |
+| Total Bookings  | All-time booking count           |
+| Revenue         | Total platform revenue           |
+| Active Bookings | Currently active pickups         |
+| Completion Rate | Percentage of completed bookings |
+
+## Page Structure
+
+```tsx
+// app/admin/dashboard/page.tsx
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
+import { KpiCard } from "@/components/shared/kpi-card";
+
+export default function AdminDashboardPage() {
+  const { data: stats } = useQuery({
+    queryKey: ["admin", "stats"],
+    queryFn: () => apiFetch("/admin/stats"),
+  });
+
+  return (
+    <div className="space-y-6">
+      <h1>Admin Dashboard</h1>
+
+      {/* KPI Grid */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <KpiCard
+          label="Total Users"
+          value={stats?.totalUsers}
+          change={stats?.userGrowth}
+        />
+        <KpiCard label="Total Drivers" value={stats?.totalDrivers} />
+        <KpiCard label="Total Bookings" value={stats?.totalBookings} />
+        <KpiCard label="Revenue" value={`LKR ${stats?.totalRevenue}`} />
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <h3>Bookings Over Time</h3>
+          {/* Line chart */}
+        </Card>
+        <Card>
+          <h3>Revenue by Category</h3>
+          {/* Pie chart */}
+        </Card>
+      </div>
+
+      {/* Recent Activity */}
+      <Card>
+        <h3>Recent Bookings</h3>
+        <Table>{/* Recent bookings table */}</Table>
+      </Card>
+    </div>
+  );
+}
+```
+
+## API Endpoint
+
+```http
+GET /api/admin/stats
+
+Response:
+{
+  "totalUsers": 1250,
+  "totalDrivers": 45,
+  "totalBookings": 3890,
+  "totalRevenue": 458000,
+  "activeBookings": 23,
+  "completionRate": 94.5,
+  "userGrowth": 12.5,
+  "revenueGrowth": 8.3,
+  "bookingsByCategory": [...],
+  "recentBookings": [...]
+}
+```
+
+## Quick Actions
+
+- View all users
+- View all drivers
+- View all bookings
+- Update pricing
+- System settings
+
+## Related Pages
+
+<CardGroup cols={2}>
+  <Card title="User Management" icon="users" href="/client/pages/admin-users">
+    Manage platform users.
+  </Card>
+  <Card
+    title="Driver Management"
+    icon="truck"
+    href="/client/pages/admin-drivers"
+  >
+    Manage drivers.
+  </Card>
+  <Card title="Bookings" icon="calendar" href="/client/pages/admin-bookings">
+    View all bookings.
+  </Card>
+  <Card title="Pricing" icon="tag" href="/client/pages/admin-pricing">
+    Configure pricing.
+  </Card>
+</CardGroup>

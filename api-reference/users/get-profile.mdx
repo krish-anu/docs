@@ -1,0 +1,57 @@
+---
+title: "Get Profile"
+openapi: "GET /api/users/me"
+---
+
+Get the current authenticated user's profile.
+
+## Authorization
+
+<Info>
+  Requires authentication. Include JWT token in the Authorization header.
+</Info>
+
+```
+Authorization: Bearer <token>
+```
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "id": "uuid-here",
+      "email": "user@example.com",
+      "fullName": "John Doe",
+      "phone": "+94771234567",
+      "address": "123 Main Street, Colombo",
+      "role": "USER",
+      "isVerified": true,
+      "createdAt": "2024-01-15T10:30:00Z",
+      "updatedAt": "2024-01-20T14:45:00Z"
+    }
+    ```
+  </Tab>
+  <Tab title="401 Unauthorized">
+    ```json
+    {
+      "statusCode": 401,
+      "message": "Unauthorized"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+curl https://api.trash2cash.lk/api/users/me \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+## Notes
+
+- Password field is never returned in the response
+- Use this endpoint to check if the token is still valid
+- Returns all user fields except sensitive data

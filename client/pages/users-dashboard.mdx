@@ -1,0 +1,138 @@
+---
+title: "User Dashboard"
+description: "Main dashboard for registered users"
+---
+
+## Overview
+
+The User Dashboard (`/users/dashboard`) provides users with an at-a-glance view of their waste collection activity and quick access to key features.
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="KPI Cards" icon="chart-simple">
+    Display total earnings, waste collected, pending pickups, and CO₂ saved.
+  </Card>
+  <Card title="Quick Actions" icon="bolt">
+    One-click booking creation for new waste pickups.
+  </Card>
+  <Card title="Recent Bookings" icon="history">
+    View latest booking activity with status indicators.
+  </Card>
+  <Card title="AI Assistant" icon="robot">
+    Chat with the AI assistant for help and support.
+  </Card>
+</CardGroup>
+
+## KPI Metrics
+
+| Metric          | Description                                     |
+| --------------- | ----------------------------------------------- |
+| Total Earned    | Cumulative earnings from all completed pickups  |
+| Total Waste     | Total weight (kg) of waste collected            |
+| Pending Pickups | Number of scheduled pickups awaiting collection |
+| CO₂ Saved       | Estimated carbon footprint reduction            |
+
+## Page Structure
+
+```tsx
+// app/users/dashboard/page.tsx
+"use client";
+
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
+import { KpiCard } from "@/components/shared/kpi-card";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+
+export default function DashboardPage() {
+  const { user } = useAuth();
+  const { data } = useQuery({
+    queryKey: ["bookings", "recent"],
+    queryFn: () => apiFetch<{ items: Booking[] }>("/bookings"),
+  });
+
+  const bookings = data?.items ?? [];
+
+  const metrics = useMemo(() => {
+    const totalEarned = bookings.reduce(
+      (sum, b) => sum + (b.finalAmountLkr ?? 0),
+      0,
+    );
+    const totalWeight = bookings.reduce(
+      (sum, b) => sum + (b.actualWeightKg ?? 0),
+      0,
+    );
+    const pending = bookings.filter((b) => b.status === "SCHEDULED").length;
+    const co2 = Math.round(totalWeight * 1.7);
+
+    return { totalEarned, totalWeight, pending, co2 };
+  }, [bookings]);
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <p className="text-muted">Dashboard</p>
+        <h1>Welcome back, {user?.fullName?.split(" ")[0]}!</h1>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <KpiCard label="Total Earned" value={`LKR ${metrics.totalEarned}`} />
+        <KpiCard label="Total Waste" value={`${metrics.totalWeight} kg`} />
+        <KpiCard label="Pending Pickups" value={metrics.pending} />
+        <KpiCard label="CO₂ Saved" value={`${metrics.co2} kg`} />
+      </div>
+
+      {/* Quick Action */}
+      <Card>
+        <h3>Ready for another pickup?</h3>
+        <Button asChild>
+          <Link href="/users/bookings/new">+ Book New Pickup</Link>
+        </Button>
+      </Card>
+
+      {/* Recent Bookings Table */}
+      <Card>
+        <h3>Recent Bookings</h3>
+        {/* Table component */}
+      </Card>
+    </div>
+  );
+}
+```
+
+## Data Fetching
+
+The dashboard uses TanStack Query for data fetching:
+
+```tsx
+const { data, isLoading, error } = useQuery({
+  queryKey: ["bookings", "recent"],
+  queryFn: () => apiFetch("/bookings"),
+  staleTime: 1000 * 60 * 5, // 5 minutes
+});
+```
+
+## Navigation
+
+From the dashboard, users can navigate to:
+
+- `/users/bookings/new` - Create new booking
+- `/users/bookings` - View all bookings
+- `/users/bookings/[id]` - View booking details
+- `/users/profile` - Update profile
+
+## Related Pages
+
+<CardGroup cols={2}>
+  <Card title="Bookings" icon="calendar" href="/client/pages/users-bookings">
+    Manage all waste pickup bookings.
+  </Card>
+  <Card title="Profile" icon="user" href="/client/pages/users-profile">
+    Update user profile settings.
+  </Card>
+</CardGroup>

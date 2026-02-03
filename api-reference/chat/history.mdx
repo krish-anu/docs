@@ -1,0 +1,85 @@
+---
+title: "Chat History"
+openapi: "GET /api/chat/history"
+---
+
+Get chat history for the current user.
+
+## Authorization
+
+<Info>
+  Requires authentication. Include JWT token in the Authorization header.
+</Info>
+
+```
+Authorization: Bearer <token>
+```
+
+## Query Parameters
+
+| Parameter | Type   | Default | Description                |
+| --------- | ------ | ------- | -------------------------- |
+| `limit`   | number | 50      | Maximum messages to return |
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "messages": [
+        {
+          "id": "msg-uuid-1",
+          "role": "user",
+          "content": "What types of waste do you accept?",
+          "createdAt": "2024-01-25T14:28:00Z"
+        },
+        {
+          "id": "msg-uuid-2",
+          "role": "assistant",
+          "content": "We accept various types of recyclable waste including...",
+          "createdAt": "2024-01-25T14:28:05Z"
+        },
+        {
+          "id": "msg-uuid-3",
+          "role": "user",
+          "content": "How do I schedule a pickup?",
+          "createdAt": "2024-01-25T14:30:00Z"
+        },
+        {
+          "id": "msg-uuid-4",
+          "role": "assistant",
+          "content": "To schedule a pickup, follow these steps...",
+          "createdAt": "2024-01-25T14:30:05Z"
+        }
+      ],
+      "total": 4
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+# Get last 50 messages (default)
+curl "https://api.trash2cash.lk/api/chat/history" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+# Get last 10 messages
+curl "https://api.trash2cash.lk/api/chat/history?limit=10" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+## Message Roles
+
+| Role        | Description                |
+| ----------- | -------------------------- |
+| `user`      | Message sent by the user   |
+| `assistant` | Response from AI assistant |
+
+## Notes
+
+- Messages are ordered chronologically (oldest first)
+- History is persisted across sessions
+- Each user has their own chat history

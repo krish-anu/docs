@@ -1,0 +1,90 @@
+---
+title: "List Drivers"
+openapi: "GET /api/admin/drivers"
+---
+
+Get a list of all drivers with their statistics.
+
+## Authorization
+
+<Info>Requires ADMIN role. Include JWT token in the Authorization header.</Info>
+
+```
+Authorization: Bearer <token>
+```
+
+## Query Parameters
+
+| Parameter   | Type    | Default | Description             |
+| ----------- | ------- | ------- | ----------------------- |
+| `page`      | number  | 1       | Page number             |
+| `limit`     | number  | 10      | Items per page          |
+| `search`    | string  | -       | Search by name or email |
+| `available` | boolean | -       | Filter by availability  |
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "items": [
+        {
+          "id": "driver-uuid",
+          "email": "driver@example.com",
+          "fullName": "Driver Name",
+          "phone": "+94771234567",
+          "role": "DRIVER",
+          "isVerified": true,
+          "createdAt": "2024-01-10T08:00:00Z",
+          "stats": {
+            "totalAssigned": 60,
+            "completed": 55,
+            "inProgress": 2,
+            "completionRate": 91.67,
+            "totalWeightCollected": 550.5
+          },
+          "currentBookings": [
+            {
+              "id": "booking-uuid",
+              "status": "ASSIGNED",
+              "scheduledDate": "2024-02-01T10:00:00Z"
+            }
+          ]
+        }
+      ],
+      "total": 12,
+      "page": 1,
+      "limit": 10,
+      "totalPages": 2
+    }
+    ```
+  </Tab>
+  <Tab title="403 Forbidden">
+    ```json
+    {
+      "statusCode": 403,
+      "message": "Forbidden resource"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+# Get all drivers
+curl "https://api.trash2cash.lk/api/admin/drivers" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+# Filter available drivers
+curl "https://api.trash2cash.lk/api/admin/drivers?available=true" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+## Notes
+
+- Only users with DRIVER role are returned
+- `available` filters drivers with less than 5 active bookings
+- `stats` include lifetime performance metrics
+- `currentBookings` shows active (non-completed) bookings

@@ -1,94 +1,184 @@
 ---
-title: 'Development'
-description: 'Preview changes locally to update your docs'
+title: "Development"
+description: "Set up your local development environment for Trash2Cash"
 ---
 
 <Info>
-  **Prerequisites**:
-  - Node.js version 19 or higher
-  - A docs repository with a `docs.json` file
+  **Prerequisites**: - Node.js v18 or higher - npm or yarn - Docker and Docker
+  Compose - Git
 </Info>
 
-Follow these steps to install and run Mintlify on your operating system.
+## Development Setup
 
 <Steps>
-<Step title="Install the Mintlify CLI">
+<Step title="Start Infrastructure Services">
 
 ```bash
-npm i -g mint
+docker-compose up -d
 ```
+
+This starts PostgreSQL and Redis containers.
+
 </Step>
 
-<Step title="Preview locally">
-
-Navigate to your docs directory where your `docs.json` file is located, and run the following command:
+<Step title="Run Server in Development Mode">
 
 ```bash
-mint dev
+cd server
+npm install
+npm run start:dev
 ```
 
-A local preview of your documentation will be available at `http://localhost:3000`.
+The server runs on `http://localhost:4000` with hot-reload enabled.
+
+</Step>
+
+<Step title="Run Client in Development Mode">
+
+```bash
+cd client
+npm install
+npm run dev
+```
+
+The client runs on `http://localhost:3000` with fast refresh.
 
 </Step>
 </Steps>
 
-## Custom ports
+## Environment Variables
 
-By default, Mintlify uses port 3000. You can customize the port Mintlify runs on by using the `--port` flag. For example, to run Mintlify on port 3333, use this command:
-
-```bash
-mint dev --port 3333
-```
-
-If you attempt to run Mintlify on a port that's already in use, it will use the next available port:
-
-```md
-Port 3000 is already in use. Trying 3001 instead.
-```
-
-## Mintlify versions
-
-Please note that each CLI release is associated with a specific version of Mintlify. If your local preview does not align with the production version, please update the CLI:
+### Server (.env)
 
 ```bash
-npm mint update
+# Database
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/trash2cash"
+
+# JWT
+JWT_SECRET="your-jwt-secret"
+JWT_REFRESH_SECRET="your-refresh-secret"
+
+# Redis (optional)
+REDIS_URL="redis://localhost:6379"
+
+# Email (optional)
+SMTP_HOST="smtp.example.com"
+SMTP_PORT="587"
+SMTP_USER="your-email"
+SMTP_PASS="your-password"
 ```
 
-## Validating links
-
-The CLI can assist with validating links in your documentation. To identify any broken links, use the following command:
+### Client (.env.local)
 
 ```bash
-mint broken-links
+NEXT_PUBLIC_API_URL="http://localhost:4000/api"
 ```
 
-## Deployment
+## Database Management
 
-If the deployment is successful, you should see the following:
+### Run Migrations
 
-<Frame>
-  <img src="/images/checks-passed.png" alt="Screenshot of a deployment confirmation message that says All checks have passed." style={{ borderRadius: '0.5rem' }} />
-</Frame>
+```bash
+cd server
+npx prisma migrate dev
+```
 
-## Code formatting
+### Seed Database
 
-We suggest using extensions on your IDE to recognize and format MDX. If you're a VSCode user, consider the [MDX VSCode extension](https://marketplace.visualstudio.com/items?itemName=unifiedjs.vscode-mdx) for syntax highlighting, and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) for code formatting.
+```bash
+npx prisma db seed
+```
+
+### Open Prisma Studio
+
+```bash
+npx prisma studio
+```
+
+This opens a GUI at `http://localhost:5555` for database exploration.
+
+## Code Quality
+
+### Linting
+
+```bash
+# Server
+cd server && npm run lint
+
+# Client
+cd client && npm run lint
+```
+
+### Type Checking
+
+```bash
+# Server
+cd server && npm run build
+
+# Client
+cd client && npm run build
+```
+
+## Testing
+
+### Server Tests
+
+```bash
+cd server
+npm run test        # Unit tests
+npm run test:e2e    # E2E tests
+npm run test:cov    # Coverage report
+```
+
+## Useful Commands
+
+| Command                    | Description              |
+| -------------------------- | ------------------------ |
+| `docker-compose up -d`     | Start database and Redis |
+| `docker-compose down`      | Stop all containers      |
+| `docker-compose logs -f`   | View container logs      |
+| `npx prisma migrate reset` | Reset database           |
+| `npx prisma generate`      | Regenerate Prisma client |
+
+## IDE Setup
+
+### VSCode Extensions
+
+- **ESLint** - Linting
+- **Prettier** - Code formatting
+- **Prisma** - Schema highlighting
+- **Tailwind CSS IntelliSense** - CSS autocompletion
+
+### Recommended Settings
+
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "typescript.preferences.importModuleSpecifier": "relative"
+}
+```
 
 ## Troubleshooting
 
 <AccordionGroup>
-  <Accordion title='Error: Could not load the "sharp" module using the darwin-arm64 runtime'>
-
-    This may be due to an outdated version of node. Try the following:
-    1. Remove the currently-installed version of the CLI: `npm remove -g mint`
-    2. Upgrade to Node v19 or higher.
-    3. Reinstall the CLI: `npm i -g mint`
+  <Accordion title="Database connection failed">
+    Make sure Docker containers are running:
+    ```bash
+    docker-compose ps
+    ```
+    If not running, start them with `docker-compose up -d`.
   </Accordion>
 
-  <Accordion title="Issue: Encountering an unknown error">
-  
-    Solution: Go to the root of your device and delete the `~/.mintlify` folder. Then run `mint dev` again.
+<Accordion title="Port already in use">
+  Check what's using the port: ```bash lsof -i :4000 # Server lsof -i :3000 #
+  Client ``` Kill the process or use a different port.
+</Accordion>
+
+  <Accordion title="Prisma client out of sync">
+    Regenerate the Prisma client:
+    ```bash
+    npx prisma generate
+    ```
   </Accordion>
 </AccordionGroup>
-
-Curious about what changed in the latest CLI version? Check out the [CLI changelog](https://www.npmjs.com/package/mintlify?activeTab=versions).
