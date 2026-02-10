@@ -3,7 +3,7 @@ title: "Chat History"
 openapi: "GET /api/chat/history"
 ---
 
-Get chat history for the current user.
+Get chat history for real-time messaging between users and support staff.
 
 ## Authorization
 
@@ -30,26 +30,34 @@ Authorization: Bearer <token>
       "messages": [
         {
           "id": "msg-uuid-1",
-          "role": "user",
+          "senderId": "user-uuid",
+          "senderName": "John Doe",
+          "senderType": "user",
           "content": "What types of waste do you accept?",
           "createdAt": "2024-01-25T14:28:00Z"
         },
         {
           "id": "msg-uuid-2",
-          "role": "assistant",
-          "content": "We accept various types of recyclable waste including...",
+          "senderId": "support-uuid",
+          "senderName": "Support Agent",
+          "senderType": "support",
+          "content": "We accept various types of recyclable waste including plastics, paper, and metals.",
           "createdAt": "2024-01-25T14:28:05Z"
         },
         {
           "id": "msg-uuid-3",
-          "role": "user",
+          "senderId": "user-uuid",
+          "senderName": "John Doe",
+          "senderType": "user",
           "content": "How do I schedule a pickup?",
           "createdAt": "2024-01-25T14:30:00Z"
         },
         {
           "id": "msg-uuid-4",
-          "role": "assistant",
-          "content": "To schedule a pickup, follow these steps...",
+          "senderId": "support-uuid",
+          "senderName": "Support Agent",
+          "senderType": "support",
+          "content": "To schedule a pickup, use the Bookings section in the app. Select your preferred date and time.",
           "createdAt": "2024-01-25T14:30:05Z"
         }
       ],
@@ -71,15 +79,16 @@ curl "https://api.trash2cash.lk/api/chat/history?limit=10" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-## Message Roles
+## Message Types
 
-| Role        | Description                |
-| ----------- | -------------------------- |
-| `user`      | Message sent by the user   |
-| `assistant` | Response from AI assistant |
+| Sender Type | Description                 |
+| ----------- | --------------------------- |
+| `user`      | Message sent by the user    |
+| `support`   | Response from support staff |
 
 ## Notes
 
 - Messages are ordered chronologically (oldest first)
 - History is persisted across sessions
 - Each user has their own chat history
+- Real-time WebSocket updates available via `/api/chat` gateway

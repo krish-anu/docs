@@ -25,7 +25,8 @@ Get all waste categories with pricing.
         "id": "cat-plastic-uuid",
         "name": "Plastic",
         "description": "PET bottles, containers, packaging",
-        "pricePerKg": 50.00,
+        "minPriceLkrPerKg": 40.00,
+        "maxPriceLkrPerKg": 60.00,
         "isActive": true,
         "createdAt": "2024-01-01T00:00:00Z",
         "updatedAt": "2024-01-20T10:00:00Z"
@@ -34,7 +35,8 @@ Get all waste categories with pricing.
         "id": "cat-paper-uuid",
         "name": "Paper",
         "description": "Newspapers, cardboard, office paper",
-        "pricePerKg": 30.00,
+        "minPriceLkrPerKg": 20.00,
+        "maxPriceLkrPerKg": 35.00,
         "isActive": true,
         "createdAt": "2024-01-01T00:00:00Z",
         "updatedAt": "2024-01-20T10:00:00Z"
@@ -63,7 +65,8 @@ Update a waste category's pricing.
 
 ```json
 {
-  "pricePerKg": 55.0,
+  "minPriceLkrPerKg": 45.0,
+  "maxPriceLkrPerKg": 65.0,
   "description": "Updated description",
   "isActive": true
 }
@@ -71,11 +74,12 @@ Update a waste category's pricing.
 
 #### Parameters
 
-| Field         | Type    | Required | Description             |
-| ------------- | ------- | -------- | ----------------------- |
-| `pricePerKg`  | number  | No       | New price per kg        |
-| `description` | string  | No       | Updated description     |
-| `isActive`    | boolean | No       | Enable/disable category |
+| Field              | Type    | Required | Description             |
+| ------------------ | ------- | -------- | ----------------------- |
+| `minPriceLkrPerKg` | number  | No       | Minimum price per kg    |
+| `maxPriceLkrPerKg` | number  | No       | Maximum price per kg    |
+| `description`      | string  | No       | Updated description     |
+| `isActive`         | boolean | No       | Enable/disable category |
 
 #### Response
 
@@ -84,7 +88,8 @@ Update a waste category's pricing.
     ```json
     {
       "id": "cat-plastic-uuid",
-      "name": "Plastic",
+      "minPriceLkrPerKg": 45.00,
+      "maxPriceLkrPerKg": 6c",
       "description": "Updated description",
       "pricePerKg": 55.00,
       "isActive": true,
@@ -108,7 +113,7 @@ Update a waste category's pricing.
 ```bash
 curl -X PATCH "https://api.trash2cash.lk/api/admin/pricing/cat-plastic-uuid" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
-  -H "Content-Type: application/json" \
+  -H "ConminPriceLkrPerKg": 45.00, "maxPriceLkrPerKg": 6lication/json" \
   -d '{ "pricePerKg": 55.00 }'
 ```
 
@@ -125,7 +130,8 @@ Create a new waste category.
 ```json
 {
   "name": "Organic",
-  "description": "Compostable organic waste",
+  "minPriceLkrPerKg": 10.0,
+  "maxPriceLkrPerKg": 20Compostable organic waste",
   "pricePerKg": 15.0
 }
 ```
@@ -138,7 +144,8 @@ Create a new waste category.
     {
       "id": "cat-organic-uuid",
       "name": "Organic",
-      "description": "Compostable organic waste",
+      "minPriceLkrPerKg": 10.00,
+      "maxPriceLkrPerKg": 20Compostable organic waste",
       "pricePerKg": 15.00,
       "isActive": true,
       "createdAt": "2024-01-25T14:30:00Z"

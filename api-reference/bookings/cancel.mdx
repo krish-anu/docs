@@ -70,14 +70,14 @@ curl -X POST "https://api.trash2cash.lk/api/bookings/booking-uuid/cancel" \
 
 ## Cancellation Rules
 
-| Status        | Can Cancel                  |
-| ------------- | --------------------------- |
-| `PENDING`     | ✅ Yes                      |
-| `CONFIRMED`   | ✅ Yes                      |
-| `ASSIGNED`    | ✅ Yes (driver is notified) |
-| `IN_PROGRESS` | ❌ No                       |
-| `COMPLETED`   | ❌ No                       |
-| `CANCELLED`   | ❌ Already cancelled        |
+| Status      | Can Cancel                  |
+| ----------- | --------------------------- |
+| `SCHEDULED` | ✅ Yes                      |
+| `COLLECTED` | ✅ Yes (driver is notified) |
+| `PAID`      | ❌ No                       |
+| `COMPLETED` | ❌ No                       |
+| `CANCELLED` | ❌ Already cancelled        |
+| `REFUNDED`  | ❌ Already refunded         |
 
 ## Notes
 

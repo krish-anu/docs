@@ -1,6 +1,56 @@
 ---
-title: "Admin Dashboard Stats"
-openapi: "GET /api/admin/stats"
+title: "Dashboard Metrics"
+openapi: "GET /api/admin/metrics"
 ---
 
-Placeholder documentation for admin dashboard statistics.
+Get key performance metrics and dashboard statistics for the admin dashboard.
+
+## Authorization
+
+<Info>Requires ADMIN role. Include JWT token in the Authorization header.</Info>
+
+```
+Authorization: Bearer <token>
+```
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "totalUsers": 150,
+      "totalDrivers": 12,
+      "totalBookings": 450,
+      "scheduledBookings": 25,
+      "completedBookings": 380,
+      "totalRevenue": 125000.00,
+      "totalWeightCollected": 2500.5,
+      "todayBookings": 8,
+      "todayRevenue": 3500.00
+    }
+    ```
+  </Tab>
+  <Tab title="403 Forbidden">
+    ```json
+    {
+      "statusCode": 403,
+      "message": "Forbidden"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+curl https://api.trash2cash.lk/api/admin/metrics \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+## Notes
+
+- Only accessible by users with ADMIN role
+- Metrics are calculated in real-time
+- All revenue numbers are in LKR (Sri Lankan Rupees)
+- Weight is measured in kilograms

@@ -1,6 +1,6 @@
 ---
 title: "Quickstart"
-description: "Get Trash2Cash running locally in under 5 minutes"
+description: "Get started with Trash2Cash by setting up the platform locally in under 5 minutes"
 ---
 
 ## Prerequisites
@@ -25,16 +25,15 @@ cd trash2cash
 
 <Step title="Start the Database">
 
-Start PostgreSQL and Redis using Docker Compose:
+Start PostgreSQL using Docker Compose:
 
 ```bash
-docker-compose up -d
+docker-compose -f docker-compose.dev.yml up -d
 ```
 
 This will start:
 
 - PostgreSQL on port `5432`
-- Redis on port `6379`
   </Step>
 
 <Step title="Set Up the Server">
@@ -69,13 +68,13 @@ The client will be running at `http://localhost:3000`
 
 ## Default Test Accounts
 
-After seeding the database, you can use these accounts:
+After seeding the database, you can use these accounts to explore the platform:
 
-| Role   | Email                 | Password  |
-| ------ | --------------------- | --------- |
-| Admin  | admin@trash2cash.com  | admin123  |
-| User   | user@trash2cash.com   | user123   |
-| Driver | driver@trash2cash.com | driver123 |
+| Role   | Email                | Password     |
+| ------ | -------------------- | ------------ |
+| Admin  | admin@trash2cash.lk  | Password123! |
+| User   | user@trash2cash.lk   | Password123! |
+| Driver | driver@trash2cash.lk | Password123! |
 
 ## Project Structure
 
@@ -92,6 +91,8 @@ trash2cash/
 ```
 
 ## Next Steps
+
+Once set up, you can book a pickup by logging in as a user and navigating to the bookings section.
 
 <CardGroup cols={2}>
   <Card title="Architecture" icon="sitemap" href="/architecture">

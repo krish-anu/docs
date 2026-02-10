@@ -35,24 +35,17 @@ Authorization: Bearer <token>
         {
           "id": "booking-uuid",
           "wasteCategoryId": "category-uuid",
-          "estimatedWeightKg": 10.5,
-          "actualWeightKg": 11.0,
-          "estimatedMinAmount": 472.50,
-          "estimatedMaxAmount": 577.50,
-          "finalAmount": 550.00,
-          "address": "123 Main Street, Colombo 05",
+          "estimatedWeightRange": "5-15kg",
+          "estimatedMinAmount": 250.00,
+          "estimatedMaxAmount": 750.00,
           "scheduledDate": "2024-02-01T10:00:00Z",
-          "status": "COMPLETED",
+          "status": "SCHEDULED",
           "createdAt": "2024-01-25T14:30:00Z",
           "wasteCategory": {
             "id": "category-uuid",
             "name": "Plastic",
-            "pricePerKg": 50.00
-          },
-          "driver": {
-            "id": "driver-uuid",
-            "fullName": "Driver Name",
-            "phone": "+94771234567"
+            "minPriceLkrPerKg": 40.00,
+            "maxPriceLkrPerKg": 60.00
           }
         }
       ],
@@ -91,14 +84,14 @@ curl "https://api.trash2cash.lk/api/bookings?page=2&limit=5" \
 
 ## Status Values
 
-| Status        | Description                |
-| ------------- | -------------------------- |
-| `PENDING`     | Awaiting confirmation      |
-| `CONFIRMED`   | Confirmed, awaiting driver |
-| `ASSIGNED`    | Driver assigned            |
-| `IN_PROGRESS` | Pickup in progress         |
-| `COMPLETED`   | Pickup completed           |
-| `CANCELLED`   | Booking cancelled          |
+| Status      | Description          |
+| ----------- | -------------------- |
+| `SCHEDULED` | Scheduled for pickup |
+| `COLLECTED` | Waste collected      |
+| `PAID`      | Payment processed    |
+| `COMPLETED` | Booking completed    |
+| `CANCELLED` | Booking cancelled    |
+| `REFUNDED`  | Refund processed     |
 
 ## Notes
 

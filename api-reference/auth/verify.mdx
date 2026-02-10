@@ -27,16 +27,8 @@ Verify user email with the OTP sent during signup.
   <Tab title="200 OK">
     ```json
     {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-      "user": {
-        "id": "uuid-here",
-        "email": "user@example.com",
-        "fullName": "John Doe",
-        "phone": "+94771234567",
-        "role": "USER",
-        "isVerified": true,
-        "createdAt": "2024-01-15T10:30:00Z"
-      }
+      "message": "Email verified successfully",
+      "isVerified": true
     }
     ```
   </Tab>
@@ -72,6 +64,6 @@ curl -X POST https://api.trash2cash.lk/api/auth/verify \
 ## Notes
 
 - OTP expires after 10 minutes
-- Upon successful verification, a JWT token is returned
-- User can now login normally
+- Upon successful verification, email is marked as verified
+- User can now login normally with their credentials
 - Use `/api/auth/resend-otp` if OTP expires

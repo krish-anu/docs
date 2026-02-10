@@ -36,14 +36,10 @@ sequenceDiagram
 
 ## JWT Strategy
 
+JWT tokens are extracted from the `Authorization: Bearer <token>` header and validated using Passport.
+
 ```typescript
 // src/auth/jwt.strategy.ts
-import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { PassportStrategy } from "@nestjs/passport";
-import { ExtractJwt, Strategy } from "passport-jwt";
-import { ConfigService } from "@nestjs/config";
-import { PrismaService } from "../prisma/prisma.service";
-
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
@@ -53,7 +49,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: config.get("JWT_SECRET"),
+      secretOrKey: config.get("JWT_ACCESS_SECRET"),
     });
   }
 
@@ -73,6 +69,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
 ## Auth Service
 
+The Auth Service handles all authentication operations including signup, login, OTP verification, and token refresh.
+
+### Token Expiration
+
+- **Access Token**: 15 minutes
+- **Refresh Token**: 7 days
+
 ```typescript
 // src/auth/auth.service.ts
 @Injectable()
@@ -83,8 +86,8 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async signup(dto: SignupDto) {
-    // Check if user exists
+  async signup(dto: RegisterDto) {
+    // Check if user already exists
     const exists = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -93,27 +96,25 @@ export class AuthService {
       throw new ConflictException("Email already registered");
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    // Hash password with bcrypt
+    const passwordHash = await bcrypt.hash(dto.password, 10);
 
-    // Generate OTP
+    // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Create user
+    // Create user in database
     const user = await this.prisma.user.create({
       data: {
         email: dto.email,
-        password: hashedPassword,
-        fullName: dto.fullName,
-        phone: dto.phone,
-        verificationOtp: otp,
+        passwordHash,
+        role: Role.CUSTOMER,
       },
     });
 
-    // Send OTP email
+    // Send OTP to email for verification
     await this.sendOtpEmail(user.email, otp);
 
-    return { message: "Verification OTP sent to email" };
+    return { message: "Verification OTP sent to email", userId: user.id };
   }
 
   async login(dto: LoginDto) {
@@ -125,25 +126,21 @@ export class AuthService {
       throw new UnauthorizedException("Invalid credentials");
     }
 
-    const valid = await bcrypt.compare(dto.password, user.password);
+    const valid = await bcrypt.compare(dto.password, user.passwordHash);
 
     if (!valid) {
       throw new UnauthorizedException("Invalid credentials");
     }
 
-    if (!user.isVerified) {
-      throw new ForbiddenException("Please verify your email first");
-    }
-
-    const token = this.signToken(user.id);
+    const tokens = this.generateTokens(user.id);
 
     return {
-      token,
-      user: this.excludePassword(user),
+      user: this.sanitizeUser(user),
+      ...tokens,
     };
   }
 
-  async verifyEmail(dto: VerifyDto) {
+  async verifyOtp(dto: VerifyOtpDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });

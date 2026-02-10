@@ -1,6 +1,6 @@
 ---
 title: "User Bookings"
-description: "Booking management for users"
+description: "Schedule and manage waste pickup bookings in Trash2Cash"
 ---
 
 ## Overview
@@ -187,13 +187,14 @@ export default function NewBookingPage() {
 
 ## Booking Status
 
-| Status        | Description                                 |
-| ------------- | ------------------------------------------- |
-| `SCHEDULED`   | Booking created, awaiting driver assignment |
-| `ASSIGNED`    | Driver assigned, awaiting pickup            |
-| `IN_PROGRESS` | Driver en route or collecting               |
-| `COMPLETED`   | Pickup completed, payment processed         |
-| `CANCELLED`   | Booking cancelled by user or admin          |
+| Status      | Description                                 |
+| ----------- | ------------------------------------------- |
+| `SCHEDULED` | Booking created, awaiting driver collection |
+| `COLLECTED` | Waste collected by driver                   |
+| `PAID`      | Payment processed                           |
+| `COMPLETED` | Booking completed                           |
+| `CANCELLED` | Booking cancelled by user or admin          |
+| `REFUNDED`  | Refund processed                            |
 
 ## Booking Details
 

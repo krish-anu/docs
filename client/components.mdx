@@ -1,14 +1,12 @@
 ---
 title: "Components"
-description: "Reusable UI components in the client application"
+description: "Reusable UI components in the Trash2Cash client application for waste management"
 ---
 
 ## Component Organization
 
 ```
 components/
-├── assistant/           # AI chat assistant
-│   └── AssistantChatbox.tsx
 ├── auth/                # Authentication
 │   ├── auth-layout.tsx
 │   ├── auth-provider.tsx
@@ -195,23 +193,23 @@ import { AuthProvider, useAuth } from "@/components/auth/auth-provider";
 const { user, isAuthenticated, logout } = useAuth();
 ```
 
-## AI Assistant
+## Chat Support
 
-### AssistantChatbox
+### SupportChat
 
-Floating chat assistant:
+Real-time chat support component:
 
 ```tsx
-import AssistantChatbox from "@/components/assistant/AssistantChatbox";
+import { SupportChat } from "@/components/chat/support-chat";
 
-// Typically included in root layout
-<AssistantChatbox />;
+// Typically included in app layout or accessible from header
+<SupportChat />;
 ```
 
 Features:
 
-- Page-aware context
-- Markdown rendering
+- Real-time messaging
+- Message history
 - Persistent chat history
 - Keyboard shortcuts (Escape to close)
 

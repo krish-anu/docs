@@ -1,6 +1,6 @@
 ---
 title: "Development"
-description: "Set up your local development environment for Trash2Cash"
+description: "Set up your local development environment for Trash2Cash waste marketplace"
 ---
 
 <Info>
@@ -14,10 +14,10 @@ description: "Set up your local development environment for Trash2Cash"
 <Step title="Start Infrastructure Services">
 
 ```bash
-docker-compose up -d
+docker-compose -f docker-compose.dev.yml up -d
 ```
 
-This starts PostgreSQL and Redis containers.
+This starts the PostgreSQL database container.
 
 </Step>
 
@@ -52,20 +52,23 @@ The client runs on `http://localhost:3000` with fast refresh.
 
 ```bash
 # Database
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/trash2cash"
+DATABASE_URL="postgresql://user:password@localhost:5432/trash2cash"
+DIRECT_URL="postgresql://user:password@localhost:5432/trash2cash"
 
 # JWT
-JWT_SECRET="your-jwt-secret"
-JWT_REFRESH_SECRET="your-refresh-secret"
+JWT_ACCESS_SECRET="your-jwt-access-secret"
+JWT_REFRESH_SECRET="your-jwt-refresh-secret"
+JWT_ACCESS_EXPIRES="15m"
+JWT_REFRESH_EXPIRES="7d"
 
-# Redis (optional)
-REDIS_URL="redis://localhost:6379"
+# Application
+PORT="4000"
+NODE_ENV="development"
+CORS_ORIGIN="http://localhost:3000"
 
-# Email (optional)
-SMTP_HOST="smtp.example.com"
-SMTP_PORT="587"
-SMTP_USER="your-email"
-SMTP_PASS="your-password"
+# Third-party APIs (optional)
+GEMINI_API_KEY="your-gemini-api-key-here"
+TEXTLK_API_TOKEN="your-textlk-api-token-here"
 ```
 
 ### Client (.env.local)
@@ -134,7 +137,7 @@ npm run test:cov    # Coverage report
 
 | Command                    | Description              |
 | -------------------------- | ------------------------ |
-| `docker-compose up -d`     | Start database and Redis |
+| `docker-compose up -d`     | Start database           |
 | `docker-compose down`      | Stop all containers      |
 | `docker-compose logs -f`   | View container logs      |
 | `npx prisma migrate reset` | Reset database           |

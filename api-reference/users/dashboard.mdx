@@ -1,8 +1,10 @@
 ---
 title: "Dashboard"
+description: "Get dashboard statistics for tracking waste collection earnings and pickups in Trash2Cash"
 openapi: "GET /api/users/dashboard"
 ---
 
+y
 Get dashboard statistics for the current user.
 
 ## Authorization
@@ -23,9 +25,9 @@ Authorization: Bearer <token>
     {
       "totalBookings": 15,
       "completedBookings": 12,
-      "pendingBookings": 2,
-      "totalEarnings": 4500.00,
-      "totalWeightKg": 125.5,
+      "scheduledBookings": 2,
+      "totalRevenueFromWaste": 4500.00,
+      "totalWeightCollected": 125.5,
       "wasteBreakdown": [
         { "category": "Plastic", "weight": 45.0, "amount": 2250.00 },
         { "category": "Paper", "weight": 30.0, "amount": 900.00 },
@@ -42,8 +44,8 @@ Authorization: Bearer <token>
         }
       ],
       "monthlyStats": [
-        { "month": "Jan", "bookings": 3, "earnings": 1500 },
-        { "month": "Feb", "bookings": 5, "earnings": 2200 }
+        { "month": "Jan", "bookings": 3, "revenue": 1500 },
+        { "month": "Feb", "bookings": 5, "revenue": 2200 }
       ]
     }
     ```

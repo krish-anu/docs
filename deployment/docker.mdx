@@ -5,154 +5,136 @@ description: "Docker and Docker Compose setup for Trash2Cash"
 
 ## Overview
 
-Trash2Cash uses Docker Compose to orchestrate all services including the client, server, PostgreSQL, and Redis.
+Trash2Cash uses Docker Compose to orchestrate services including the backend (NestJS), frontend (Next.js), and PostgreSQL database.
+
+## Development Setup
+
+For local development, use `docker-compose.dev.yml`:
+
+```bash
+docker-compose -f docker-compose.dev.yml up --build
+```
+
+This starts:
+
+- PostgreSQL database (port 5432) - optional, configured with `local-db` profile
+- NestJS Backend (port 4000)
+- Next.js Frontend (port 3000)
+
+### Using Local PostgreSQL
+
+To use a local PostgreSQL database during development:
+
+```bash
+docker-compose -f docker-compose.dev.yml --profile local-db up --build
+```
+
+Or configure an external database URL in `.env` and omit the `--profile` flag.
+
+## Production Setup
+
+For production, use `docker-compose.prod.yml` with prebuilt images:
+
+```bash
+docker-compose -f docker-compose.prod.yml up
+```
+
+This starts:
+
+- Nginx reverse proxy (ports 80/443)
+- NestJS Backend (exposed internally on port 4000)
+- Next.js Frontend (exposed internally on port 3000)
+- PostgreSQL (external managed database via DATABASE_URL)
 
 ## Docker Compose Configuration
 
+### Development (docker-compose.dev.yml)
+
 ```yaml
-# docker-compose.yml
-version: "3.8"
-
 services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: trash2cash-postgres
+  # PostgreSQL (optional with local-db profile)
+  db:
+    image: postgres:16-alpine
+    container_name: trash2cash-db
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-trash2cash}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-trash2cash}
-      POSTGRES_DB: ${POSTGRES_DB:-trash2cash}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      POSTGRES_USER: trash2cash
+      POSTGRES_PASSWORD: trash2cash_dev_password
+      POSTGRES_DB: trash2cash
     ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-trash2cash}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - "5433:5432"
+    profiles:
+      - local-db
 
-  redis:
-    image: redis:7-alpine
-    container_name: trash2cash-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  server:
+  # NestJS Backend
+  backend:
     build:
       context: ./server
       dockerfile: Dockerfile
-    container_name: trash2cash-server
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-trash2cash}:${POSTGRES_PASSWORD:-trash2cash}@postgres:5432/${POSTGRES_DB:-trash2cash}
-      REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET}
-      CLIENT_URL: ${CLIENT_URL:-http://localhost:3000}
-      PORT: 3001
     ports:
-      - "3001:3001"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - ./server:/app
-      - /app/node_modules
+      - "4000:4000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      DIRECT_URL: ${DIRECT_URL}
+      PORT: 4000
+      NODE_ENV: development
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      CORS_ORIGIN: http://localhost:3000
 
-  client:
+  # Next.js Frontend
+  frontend:
     build:
       context: ./client
       dockerfile: Dockerfile
-    container_name: trash2cash-client
-    environment:
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001/api}
     ports:
       - "3000:3000"
-    depends_on:
-      - server
-    volumes:
-      - ./client:/app
-      - /app/node_modules
-      - /app/.next
-
-volumes:
-  postgres_data:
-  redis_data:
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:4000/api
 ```
 
-## Server Dockerfile
+### Production (docker-compose.prod.yml)
 
-```dockerfile
-# server/Dockerfile
-FROM node:20-alpine AS base
+```yaml
+services:
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
 
-WORKDIR /app
+  # NestJS Backend (prebuilt image)
+  backend:
+    image: anusan2003/trash2cash:backend
+    restart: unless-stopped
+    expose:
+      - "4000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      DIRECT_URL: ${DIRECT_URL}
+      NODE_ENV: production
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
 
-# Install dependencies
-FROM base AS deps
-COPY package*.json ./
-RUN npm ci
-
-# Development
-FROM base AS dev
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-RUN npx prisma generate
-CMD ["npm", "run", "start:dev"]
-
-# Build
-FROM base AS builder
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-RUN npx prisma generate
-RUN npm run build
-
-# Production
-FROM base AS production
-ENV NODE_ENV=production
-
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/prisma ./prisma
-COPY package*.json ./
-
-EXPOSE 3001
-CMD ["npm", "run", "start:prod"]
+  # Next.js Frontend (prebuilt image)
+  frontend:
+    image: anusan2003/trash2cash:frontend
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
 ```
 
-## Client Dockerfile
+## Building Docker Images
 
-```dockerfile
-# client/Dockerfile
-FROM node:20-alpine AS base
-
-WORKDIR /app
-
-# Install dependencies
-FROM base AS deps
-COPY package*.json ./
-RUN npm ci
-
-# Development
-FROM base AS dev
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-CMD ["npm", "run", "dev"]
-
-# Build
-FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
 # Production
+
 FROM base AS production
 ENV NODE_ENV=production
 
@@ -162,7 +144,8 @@ COPY --from=builder /app/public ./public
 
 EXPOSE 3000
 CMD ["node", "server.js"]
-```
+
+````
 
 ## Running with Docker Compose
 
@@ -177,7 +160,7 @@ docker compose logs -f
 
 # Stop services
 docker compose down
-```
+````
 
 ### Production Mode
 
@@ -265,14 +248,6 @@ docker compose logs postgres
 
 ```bash
 docker compose exec postgres psql -U trash2cash -d trash2cash
-```
-
-### Check Redis
-
-```bash
-docker compose exec redis redis-cli
-> PING
-> KEYS *
 ```
 
 ## Related Pages

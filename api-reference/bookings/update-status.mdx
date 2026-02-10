@@ -3,4 +3,90 @@ title: "Update Booking Status"
 openapi: "PATCH /api/bookings/{id}/status"
 ---
 
-Placeholder documentation for updating booking status.
+Update the status of a booking (typically used by drivers to mark pickups as completed).
+
+## Authorization
+
+<Info>
+  Requires authentication. Include JWT token in the Authorization header. Only
+  the assigned driver or admin can update booking status.
+</Info>
+
+```
+Authorization: Bearer <token>
+```
+
+## Path Parameters
+
+| Parameter | Type   | Description  |
+| --------- | ------ | ------------ |
+| `id`      | string | Booking UUID |
+
+## Request Body
+
+```json
+{
+  "status": "COMPLETED",
+  "actualWeightKg": 12.5
+}
+```
+
+## Parameters
+
+| Field            | Type   | Required | Description                                                             |
+| ---------------- | ------ | -------- | ----------------------------------------------------------------------- |
+| `status`         | string | Yes      | New status (SCHEDULED, COLLECTED, PAID, COMPLETED, CANCELLED, REFUNDED) |
+| `actualWeightKg` | number | No       | Actual weight collected (required when completing)                      |
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "id": "booking-uuid",
+      "status": "COMPLETED",
+      "actualWeightKg": 12.5,
+      "finalAmountLkr": 625.00,
+      "updatedAt": "2024-02-01T11:30:00Z",
+      "message": "Booking status updated"
+    }
+    ```
+  </Tab>
+  <Tab title="400 Bad Request">
+    ```json
+    {
+      "statusCode": 400,
+      "message": "Invalid status transition"
+    }
+    ```
+  </Tab>
+  <Tab title="403 Forbidden">
+    ```json
+    {
+      "statusCode": 403,
+      "message": "Only the assigned driver can update this booking"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+curl -X PATCH https://api.trash2cash.lk/api/bookings/booking-uuid/status \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -d '{
+    "status": "COMPLETED",
+    "actualWeightKg": 12.5
+  }'
+```
+
+## Booking Status Flow
+
+```
+SCHEDULED → COLLECTED → PAID → COMPLETED
+        ↓
+      CANCELLED → REFUNDED
+```

@@ -1,6 +1,6 @@
 ---
 title: "Architecture"
-description: "System architecture and design overview of Trash2Cash"
+description: "System architecture and design overview of Trash2Cash waste marketplace"
 ---
 
 ## System Overview
@@ -34,8 +34,8 @@ Trash2Cash follows a modern microservices-inspired architecture with a clear sep
 ┌─────────────────────────────────────────────────────────────────┐
 │                       Data Layer                                 │
 │  ┌─────────────────┐              ┌─────────────────┐           │
-│  │   PostgreSQL    │              │     Redis       │           │
-│  │   (Prisma ORM)  │              │   (Caching)     │           │
+│  │   PostgreSQL    │              │  In-Memory      │           │
+│  │   (Prisma ORM)  │              │    Cache        │           │
 │  └─────────────────┘              └─────────────────┘           │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -54,13 +54,13 @@ Trash2Cash follows a modern microservices-inspired architecture with a clear sep
 
 ### Backend
 
-| Technology | Purpose                 |
-| ---------- | ----------------------- |
-| NestJS     | Node.js framework       |
-| Prisma     | ORM for database access |
-| PostgreSQL | Primary database        |
-| Redis      | Caching and sessions    |
-| JWT        | Authentication tokens   |
+| Technology           | Purpose                 |
+| -------------------- | ----------------------- |
+| NestJS               | Node.js framework       |
+| Prisma               | ORM for database access |
+| PostgreSQL           | Primary database        |
+| NestJS Cache Manager | In-memory caching       |
+| JWT                  | Authentication tokens   |
 
 ## Data Flow
 
@@ -121,7 +121,7 @@ sequenceDiagram
     Push notifications and in-app notification management.
   </Card>
   <Card title="Chat Module" icon="message">
-    AI-powered chat assistant for user support.
+    Real-time messaging and chat support between users and drivers.
   </Card>
 </CardGroup>
 
@@ -172,7 +172,7 @@ client/
 
 ## Scalability Considerations
 
-- **Stateless API**: All state stored in database/Redis
-- **Caching**: Redis for frequently accessed data
+- **Stateless API**: All state stored in database
+- **Caching**: In-memory cache for frequently accessed data
 - **Database**: Prisma supports connection pooling
 - **Docker**: Easy horizontal scaling with containers

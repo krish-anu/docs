@@ -1,5 +1,6 @@
 ---
 title: "Login"
+description: "Authenticate a user for the Trash2Cash waste marketplace and return a JWT token"
 openapi: "POST /api/auth/login"
 ---
 
@@ -27,7 +28,7 @@ Authenticate a user and receive a JWT token.
   <Tab title="200 OK">
     ```json
     {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
       "user": {
         "id": "uuid-here",
         "email": "user@example.com",
@@ -81,8 +82,19 @@ curl https://api.trash2cash.lk/api/users/me \
 ## Token Details
 
 - **Algorithm**: HS256
-- **Expiration**: 7 days
-- **Payload**: Contains user ID (`sub` claim)
+- **Access Token Expiration**: 15 minutes
+- **Refresh Token Expiration**: 7 days (stored in httpOnly cookie)
+- **Payload**: Contains user ID (`sub` claim) and role info
+
+## Token Refresh
+
+Access tokens expire after 15 minutes. Use the refresh token (sent as httpOnly cookie) to get a new access token:
+
+```bash
+curl -X POST https://api.trash2cash.lk/api/auth/refresh \
+  -H "Cookie: refreshToken=<refresh_token>" \
+  -H "Content-Type: application/json"
+```
 
 ## Notes
 

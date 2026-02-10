@@ -1,5 +1,6 @@
 ---
 title: "Create Booking"
+description: "Create a new waste pickup booking for the Trash2Cash marketplace"
 openapi: "POST /api/bookings"
 ---
 
@@ -20,26 +21,28 @@ Authorization: Bearer <token>
 ```json
 {
   "wasteCategoryId": "category-uuid",
-  "estimatedWeightKg": 10.5,
-  "address": "123 Main Street, Colombo 05",
-  "latitude": 6.9271,
-  "longitude": 79.8612,
+  "estimatedWeightRange": "5-15kg",
+  "addressLine1": "123 Main Street",
+  "city": "Colombo",
+  "postalCode": "05",
   "scheduledDate": "2024-02-01T10:00:00Z",
-  "notes": "Please call before arriving"
+  "scheduledTimeSlot": "10:00-12:00",
+  "specialInstructions": "Please call before arriving"
 }
 ```
 
 ## Parameters
 
-| Field               | Type   | Required | Description            |
-| ------------------- | ------ | -------- | ---------------------- |
-| `wasteCategoryId`   | string | Yes      | UUID of waste category |
-| `estimatedWeightKg` | number | Yes      | Estimated weight in kg |
-| `address`           | string | Yes      | Pickup address         |
-| `latitude`          | number | No       | GPS latitude           |
-| `longitude`         | number | No       | GPS longitude          |
-| `scheduledDate`     | string | Yes      | ISO 8601 date/time     |
-| `notes`             | string | No       | Additional notes       |
+| Field                  | Type   | Required | Description                           |
+| ---------------------- | ------ | -------- | ------------------------------------- |
+| `wasteCategoryId`      | string | Yes      | UUID of waste category                |
+| `estimatedWeightRange` | string | Yes      | Weight range (e.g., "5-15kg")         |
+| `addressLine1`         | string | Yes      | Pickup street address                 |
+| `city`                 | string | Yes      | City name                             |
+| `postalCode`           | string | Yes      | Postal/ZIP code                       |
+| `scheduledDate`        | string | Yes      | ISO 8601 date                         |
+| `scheduledTimeSlot`    | string | Yes      | Time slot range (e.g., "10:00-12:00") |
+| `specialInstructions`  | string | No       | Additional instructions               |
 
 ## Response
 
@@ -49,20 +52,22 @@ Authorization: Bearer <token>
     {
       "id": "booking-uuid",
       "userId": "user-uuid",
-      "wasteCategoryId": "category-uuid",
-      "estimatedWeightKg": 10.5,
-      "estimatedMinAmount": 472.50,
-      "estimatedMaxAmount": 577.50,
-      "address": "123 Main Street, Colombo 05",
-      "latitude": 6.9271,
-      "longitude": 79.8612,
-      "scheduledDate": "2024-02-01T10:00:00Z",
-      "status": "PENDING",
-      "notes": "Please call before arriving",
+      "wasteCategoryIdRange": "5-15kg",
+      "estimatedMinAmount": 200.00,
+      "estimatedMaxAmount": 900.00,
+      "addressLine1": "123 Main Street",
+      "city": "Colombo",
+      "postalCode": "05",
+      "scheduledDate": "2024-02-01",
+      "scheduledTimeSlot": "10:00-12:00",
+      "status": "SCHEDULED",
+      "specialInstructions": "Please call before arriving",
       "createdAt": "2024-01-25T14:30:00Z",
       "wasteCategory": {
         "id": "category-uuid",
         "name": "Plastic",
+        "minPriceLkrPerKg": 40.00,
+        "maxPriceLkrPerKg": 6c",
         "pricePerKg": 50.00
       }
     }
@@ -94,18 +99,23 @@ Authorization: Bearer <token>
 ```bash
 curl -X POST https://api.trash2cash.lk/api/bookings \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
-  -H "Content-Type: application/json" \
-  -d '{
-    "wasteCategoryId": "category-uuid",
+  -H "Content-Type: Range": "5-15kg",
+    "addressLine1": "123 Main Street",
+    "city": "Colombo",
+    "postalCode": "05",
+    "scheduledDate": "2024-02-01",
+    "scheduledTimeSlot": "10:00-12:00
     "estimatedWeightKg": 10.5,
     "address": "123 Main Street, Colombo 05",
     "scheduledDate": "2024-02-01T10:00:00Z"
-  }'
-```
-
+  }'based on weight range and pricing
+- Initial status is `SCHEDULED`
+- Scheduled date must be at least 24 hours in the future
+- Time slots are pre-defined (e.g. "10:00-12:00", "14:00-16:00")
 ## Notes
 
 - `estimatedMinAmount` and `estimatedMaxAmount` are auto-calculated (±10% range)
 - Initial status is `PENDING`, waiting for admin confirmation
 - Scheduled date must be at least 24 hours in the future
 - Get available waste categories from `/api/bookings/categories`
+```

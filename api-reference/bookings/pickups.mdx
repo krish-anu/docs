@@ -1,6 +1,71 @@
 ---
-title: "Booking Pickups"
+title: "List Pickups"
 openapi: "GET /api/bookings/pickups"
 ---
 
-Placeholder documentation for booking pickups endpoints.
+Get all pickup locations or pending pickups. This endpoint is used primarily by drivers to view awaiting pickups.
+
+## Authorization
+
+<Info>
+  Requires authentication. Include JWT token in the Authorization header.
+</Info>
+
+```
+Authorization: Bearer <token>
+```
+
+## Query Parameters
+
+| Parameter | Type   | Description                 |
+| --------- | ------ | --------------------------- |
+| `status`  | string | Filter by booking status    |
+| `limit`   | number | Number of results (max 100) |
+| `offset`  | number | Pagination offset           |
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "items": [
+        {
+          "id": "booking-uuid",
+          "userId": "user-uuid",
+          "address": "123 Main Street, Colombo",
+          "city": "Colombo",
+          "postalCode": "05",
+          "wasteCategory": {
+            "id": "cat-uuid",
+            "name": "Plastic",
+            "description": "PET bottles and containers"
+          },
+          "status": "SCHEDULED",
+          "scheduledDate": "2024-02-01T10:00:00Z",
+          "scheduledTimeSlot": "10:00-12:00",
+          "estimatedWeightRange": "5-15kg",
+          "estimatedMinAmount": 250.00,
+          "estimatedMaxAmount": 750.00
+        }
+      ],
+      "total": 45
+    }
+    ```
+  </Tab>
+  <Tab title="401 Unauthorized">
+    ```json
+    {
+      "statusCode": 401,
+      "message": "Unauthorized"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+curl "https://api.trash2cash.lk/api/bookings/pickups?status=SCHEDULED" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```

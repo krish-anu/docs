@@ -1,6 +1,6 @@
 ---
 title: "Driver Dashboard"
-description: "Main dashboard for drivers"
+description: "Driver dashboard for managing pickups and tracking earnings in Trash2Cash"
 ---
 
 ## Overview
@@ -135,10 +135,10 @@ function PickupCard({ pickup }) {
       </div>
 
       <div className="mt-4 flex gap-2">
-        {pickup.status === "ASSIGNED" && (
-          <Button onClick={() => startPickup(pickup.id)}>Start Pickup</Button>
+        {pickup.status === "COLLECTED" && (
+          <Button onClick={() => startPickup(pickup.id)}>Mark as Paid</Button>
         )}
-        {pickup.status === "IN_PROGRESS" && (
+        {pickup.status === "PAID" && (
           <Button onClick={() => completePickup(pickup.id)}>
             Mark Complete
           </Button>

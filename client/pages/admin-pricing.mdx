@@ -1,6 +1,6 @@
 ---
 title: "Admin Pricing"
-description: "Pricing configuration for waste categories"
+description: "Admin pricing management for Trash2Cash waste collection categories"
 ---
 
 ## Overview
@@ -11,9 +11,9 @@ The Admin Pricing page (`/admin/pricing`) allows administrators to configure pri
 
 - View all waste categories
 - Add new categories
-- Update pricing per kg
+- Update pricing (min and max per kg)
 - Activate/deactivate categories
-- Set minimum/maximum weights
+- View pricing history
 
 ## Pricing Management
 
@@ -43,9 +43,8 @@ export default function AdminPricingPage() {
           <TableRow>
             <TableHead>Category</TableHead>
             <TableHead>Description</TableHead>
-            <TableHead>Price/kg (LKR)</TableHead>
-            <TableHead>Min Weight</TableHead>
-            <TableHead>Max Weight</TableHead>
+            <TableHead>Min Price/kg (LKR)</TableHead>
+            <TableHead>Max Price/kg (LKR)</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
@@ -56,9 +55,9 @@ export default function AdminPricingPage() {
               <TableCell className="font-medium">{category.name}</TableCell>
               <TableCell>{category.description}</TableCell>
               <TableCell>LKR {category.pricePerKg}</TableCell>
-              <TableCell>{category.minWeightKg} kg</TableCell>
-              <TableCell>{category.maxWeightKg} kg</TableCell>
+              <TableCell>{category.minWminPriceLkrPerKg}</TableCell>
               <TableCell>
+                LKR {category.maxPriceLkrPerKg}
                 <Badge variant={category.isActive ? "success" : "secondary"}>
                   {category.isActive ? "Active" : "Inactive"}
                 </Badge>
@@ -91,9 +90,8 @@ function CategoryModal({ category, onClose }) {
     name: category?.name ?? "",
     description: category?.description ?? "",
     pricePerKg: category?.pricePerKg ?? 0,
-    minWeightKg: category?.minWeightKg ?? 1,
-    maxWeightKg: category?.maxWeightKg ?? 100,
-    isActive: category?.isActive ?? true,
+    minPriceLkrPerKg: category?.minPriceLkrPerKg ?? 10,
+    maxPriceLkrPerKg: category?.maxPriceLkrPertrue,
   });
 
   const mutation = useMutation({

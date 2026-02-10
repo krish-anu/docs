@@ -1,6 +1,6 @@
 ---
 title: "Server Overview"
-description: "NestJS backend architecture for Trash2Cash"
+description: "NestJS backend for handling waste pickups, sorting, and payments in Trash2Cash"
 ---
 
 ## Introduction
@@ -19,8 +19,8 @@ The Trash2Cash server is built with [NestJS](https://nestjs.com/), a progressive
   <Card title="PostgreSQL" icon="elephant">
     Robust relational database for data persistence.
   </Card>
-  <Card title="Redis" icon="bolt">
-    In-memory cache for sessions and real-time features.
+  <Card title="NestJS Cache" icon="bolt">
+    In-memory caching with NestJS Cache Manager for performance.
   </Card>
 </CardGroup>
 
@@ -40,7 +40,7 @@ server/
 │   ├── bookings/          # Bookings module
 │   ├── admin/             # Admin module
 │   ├── notifications/     # Push notifications
-│   ├── chat/              # AI chat assistant
+│   ├── chat/              # Real-time messaging
 │   ├── common/            # Shared utilities
 │   │   ├── guards/        # Auth guards
 │   │   ├── decorators/    # Custom decorators
@@ -75,7 +75,7 @@ Web push notifications using VAPID keys.
 
 ### Chat Module
 
-AI-powered assistant for user queries.
+Real-time messaging system for communication between users and drivers.
 
 ## Entry Point
 

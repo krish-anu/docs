@@ -1,6 +1,6 @@
 ---
 title: "Driver Bookings"
-description: "Booking management for drivers"
+description: "Driver booking management for assigned waste pickups in Trash2Cash"
 ---
 
 ## Overview
@@ -41,8 +41,8 @@ export default function DriverBookingsPage() {
       <Tabs value={filter} onValueChange={setFilter}>
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="ASSIGNED">Assigned</TabsTrigger>
-          <TabsTrigger value="IN_PROGRESS">In Progress</TabsTrigger>
+          <TabsTrigger value="COLLECTED">Collected</TabsTrigger>
+          <TabsTrigger value="PAID">Paid</TabsTrigger>
           <TabsTrigger value="COMPLETED">Completed</TabsTrigger>
         </TabsList>
       </Tabs>
@@ -95,7 +95,7 @@ function BookingCard({ booking }) {
       <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
         <div>
           <p className="text-muted">Estimated Weight</p>
-          <p>{booking.estimatedWeightKg} kg</p>
+          <p>{booking.estimatedWeightRange}</p>
         </div>
         <div>
           <p className="text-muted">Estimated Amount</p>
@@ -109,11 +109,11 @@ function BookingCard({ booking }) {
 
       {/* Actions */}
       <div className="mt-4 flex gap-2">
-        {booking.status === "ASSIGNED" && (
-          <Button onClick={() => startMutation.mutate()}>Start Pickup</Button>
+        {booking.status === "COLLECTED" && (
+          <Button onClick={() => startMutation.mutate()}>Mark as Paid</Button>
         )}
 
-        {booking.status === "IN_PROGRESS" && (
+        {booking.status === "PAID" && (
           <Button onClick={() => setShowCompleteModal(true)}>
             Complete Pickup
           </Button>
@@ -161,7 +161,11 @@ function CompletePickupModal({ booking, onClose }) {
     },
   });
 
-  const finalAmount = actualWeight * booking.wasteCategory?.pricePerKg;
+  const finalAmount =
+    (actualWeight *
+      ((booking.wasteCategory?.maxPriceLkrPerKg || 60) +
+        (booking.wasteCategory?.minPriceLkrPerKg || 40))) /
+    2;
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -185,7 +189,11 @@ function CompletePickupModal({ booking, onClose }) {
             <p className="text-sm text-muted">Final Amount</p>
             <p className="text-2xl font-bold">LKR {finalAmount.toFixed(2)}</p>
             <p className="text-xs text-muted">
-              {actualWeight} kg × LKR {booking.wasteCategory?.pricePerKg}/kg
+              {actualWeight} kg × LKR{" "}
+              {((booking.wasteCategory?.maxPriceLkrPerKg || 60) +
+                (booking.wasteCategory?.minPriceLkrPerKg || 40)) /
+                2}
+              /kg (average)
             </p>
           </div>
 
@@ -218,21 +226,21 @@ function CompletePickupModal({ booking, onClose }) {
 
 ```mermaid
 stateDiagram-v2
-    [*] --> ASSIGNED: Admin assigns
-    ASSIGNED --> IN_PROGRESS: Driver starts
-    IN_PROGRESS --> COMPLETED: Driver completes
-    ASSIGNED --> CANCELLED: Admin/User cancels
-    IN_PROGRESS --> CANCELLED: Admin cancels
+    [*] --> COLLECTED: Driver collects waste
+    COLLECTED --> PAID: Payment processed
+    PAID --> COMPLETED: Driver completes
+    COLLECTED --> CANCELLED: Admin/User cancels
+    PAID --> CANCELLED: Admin cancels
 ```
 
 ## Driver Booking Actions
 
-| Status      | Available Actions                 |
-| ----------- | --------------------------------- |
-| ASSIGNED    | Start Pickup, Navigate, Call User |
-| IN_PROGRESS | Complete, Navigate, Call User     |
-| COMPLETED   | View Details                      |
-| CANCELLED   | View Details                      |
+| Status    | Available Actions                 |
+| --------- | --------------------------------- |
+| COLLECTED | Mark as Paid, Navigate, Call User |
+| PAID      | Complete, Navigate, Call User     |
+| COMPLETED | View Details                      |
+| CANCELLED | View Details                      |
 
 ## Related Pages
 

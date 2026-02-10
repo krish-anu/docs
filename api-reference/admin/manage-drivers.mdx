@@ -1,6 +1,124 @@
 ---
-title: "Admin — Manage Drivers"
-openapi: "GET /api/admin/drivers"
+title: "Manage Drivers"
+description: "Admin endpoints for managing drivers, assignments, and status"
 ---
 
-Placeholder documentation for admin driver management endpoints.
+This page covers admin endpoints for driver management including listing, creating, updating, and assigning drivers to bookings.
+
+## List Drivers
+
+<Tabs>
+  <Tab title="GET /api/admin/drivers">
+
+Get all drivers with their statistics and current status.
+
+### Authorization
+
+<Info>Requires ADMIN role</Info>
+
+### Query Parameters
+
+| Parameter | Type   | Description                                   |
+| --------- | ------ | --------------------------------------------- |
+| `search`  | string | Search by name or email                       |
+| `status`  | string | Filter by status (ONLINE, OFFLINE, ON_PICKUP) |
+
+### Response
+
+```json
+{
+  "items": [
+    {
+      "id": "driver-uuid",
+      "fullName": "Driver Name",
+      "phone": "+94771234567",
+      "rating": 4.8,
+      "pickupCount": 125,
+      "status": "ONLINE",
+      "vehicle": "Honda Civic",
+      "stats": {
+        "todayPickups": 5,
+        "completedPickups": 120,
+        "averageRating": 4.8
+      }
+    }
+  ],
+  "total": 12
+}
+```
+
+  </Tab>
+</Tabs>
+
+## Assign Driver
+
+<Tabs>
+  <Tab title="POST /api/admin/assign-driver">
+
+Assign a driver to a pending booking.
+
+### Authorization
+
+<Info>Requires ADMIN role</Info>
+
+### Request Body
+
+```json
+{
+  "bookingId": "booking-uuid",
+  "driverId": "driver-uuid"
+}
+```
+
+### Response
+
+```json
+{
+  "id": "booking-uuid",
+  "status": "COLLECTED",
+  "driverId": "driver-uuid",
+  "message": "Driver assigned successfully"
+}
+```
+
+  </Tab>
+</Tabs>
+
+## Update Driver Status
+
+<Tabs>
+  <Tab title="PATCH /api/admin/drivers/{driverId}">
+
+Update a driver's status or information.
+
+### Authorization
+
+<Info>Requires ADMIN role</Info>
+
+### Path Parameters
+
+| Parameter  | Type   | Description |
+| ---------- | ------ | ----------- |
+| `driverId` | string | Driver UUID |
+
+### Request Body
+
+```json
+{
+  "status": "ONLINE",
+  "vehicle": "Updated vehicle"
+}
+```
+
+### Response
+
+```json
+{
+  "id": "driver-uuid",
+  "status": "ONLINE",
+  "updated": true
+}
+```
+
+  </Tab>
+</Tabs>

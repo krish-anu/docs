@@ -1,5 +1,83 @@
 ---
-title: "API Reference Overview"
+title: "API Reference"
+description: "Complete API documentation for Trash2Cash waste marketplace"
 ---
 
-Welcome to the API reference. This page is a placeholder — content coming soon.
+## Overview
+
+The Trash2Cash API provides programmatic access to the waste marketplace platform. Use the API to integrate booking management, user authentication, and administrative functions into your applications.
+
+## Base URL
+
+```
+https://api.trash2cash.lk
+```
+
+## Authentication
+
+All API requests require authentication using JWT tokens. Include the token in the Authorization header:
+
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+## Response Format
+
+All responses are in JSON format:
+
+```json
+{
+  "success": true,
+  "data": { ... },
+  "message": "Optional message"
+}
+```
+
+## Error Handling
+
+Error responses include an error code and message:
+
+```json
+{
+  "success": false,
+  "error": "UNAUTHORIZED",
+  "message": "Invalid credentials"
+}
+```
+
+## Rate Limiting
+
+API requests are limited to 1000 requests per hour per IP address.
+
+## SDKs and Libraries
+
+- **JavaScript/TypeScript**: Official SDK available on npm
+- **Python**: Community-maintained library
+- **Postman Collection**: Available for testing
+
+## Getting Started
+
+1. Sign up for an API key at [app.trash2cash.lk](https://app.trash2cash.lk)
+2. Authenticate using your credentials
+3. Start making requests to the API
+
+## Support
+
+For API support, contact [support@trash2cash.lk](mailto:support@trash2cash.lk) or visit our [help center](https://trash2cash.lk/help).
+
+## Related Sections
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="lock" href="/api-reference/auth/login">
+    User authentication endpoints.
+  </Card>
+  <Card title="Bookings" icon="calendar" href="/api-reference/bookings/create">
+    Waste pickup booking management.
+  </Card>
+  <Card title="Users" icon="user" href="/api-reference/users/get-profile">
+    User profile and management.
+  </Card>
+  <Card title="Admin" icon="shield" href="/api-reference/admin/dashboard-stats">
+    Administrative functions.
+  </Card>
+</CardGroup>

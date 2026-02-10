@@ -142,7 +142,7 @@ export class NotificationsModule {}
 
 ## Chat Module
 
-AI-powered chat assistant.
+Real-time messaging system for communication between users and drivers.
 
 ```typescript
 // src/chat/chat.module.ts
@@ -150,18 +150,32 @@ AI-powered chat assistant.
   imports: [PrismaModule],
   controllers: [ChatController],
   providers: [ChatService],
+  exports: [ChatService],
 })
 export class ChatModule {}
 ```
 
 ### Chat Service Methods
 
-| Method          | Description                      |
-| --------------- | -------------------------------- |
-| `sendMessage()` | Process user message and respond |
-| `getHistory()`  | Get chat history                 |
+| Method          | Description               |
+| --------------- | ------------------------- |
+| `handleChat()`  | Process chat messages     |
+| `saveMessage()` | Store message in database |
+| `getHistory()`  | Get conversation history  |
 
-## Common Module
+## Public Module
+
+Public-facing endpoints (e.g., launch notify subscription).
+
+```typescript
+// src/public/public.module.ts
+@Module({
+  imports: [PrismaModule],
+  controllers: [PublicController],
+  providers: [PublicService],
+})
+export class PublicModule {}
+```
 
 Shared utilities and decorators.
 
@@ -231,16 +245,20 @@ graph TD
     A --> E[AdminModule]
     A --> F[NotificationsModule]
     A --> G[ChatModule]
-    A --> H[PrismaModule]
+    A --> H[PublicModule]
+    A --> I[PartnersModule]
+    A --> J[PrismaModule]
 
-    B --> H
-    C --> H
-    D --> H
+    B --> J
+    C --> J
+    D --> J
     D --> F
-    E --> H
+    E --> J
     E --> D
-    F --> H
-    G --> H
+    F --> J
+    G --> J
+    H --> J
+    I --> J
 ```
 
 ## Related Pages

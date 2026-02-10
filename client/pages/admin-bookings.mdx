@@ -1,6 +1,6 @@
 ---
 title: "Admin Bookings"
-description: "Booking management for administrators"
+description: "Admin booking management for Trash2Cash waste pickup operations"
 ---
 
 ## Overview
@@ -57,10 +57,11 @@ export default function AdminBookingsPage() {
           >
             <SelectItem value="">All Status</SelectItem>
             <SelectItem value="SCHEDULED">Scheduled</SelectItem>
-            <SelectItem value="ASSIGNED">Assigned</SelectItem>
-            <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+            <SelectItem value="COLLECTED">Collected</SelectItem>
+            <SelectItem value="PAID">Paid</SelectItem>
             <SelectItem value="COMPLETED">Completed</SelectItem>
             <SelectItem value="CANCELLED">Cancelled</SelectItem>
+            <SelectItem value="REFUNDED">Refunded</SelectItem>
           </Select>
 
           <Input
@@ -184,13 +185,14 @@ function AssignDriverModal({ bookingId, onClose }) {
 
 ## Booking Status Actions
 
-| Current Status | Available Actions       |
-| -------------- | ----------------------- |
-| SCHEDULED      | Assign Driver, Cancel   |
-| ASSIGNED       | Reassign, Start, Cancel |
-| IN_PROGRESS    | Complete, Cancel        |
-| COMPLETED      | —                       |
-| CANCELLED      | —                       |
+| Current Status | Available Actions |
+| -------------- | ----------------- |
+| SCHEDULED      | Assign Driver     |
+| COLLECTED      | Update Status     |
+| PAID           | Update Status     |
+| COMPLETED      | —                 |
+| CANCELLED      | —                 |
+| REFUNDED       | —                 |
 
 ## Export Data
 

@@ -34,7 +34,7 @@ Authorization: Bearer <token>
     ```json
     {
       "id": "booking-uuid",
-      "status": "ASSIGNED",
+      "status": "COLLECTED",
       "driverId": "driver-uuid",
       "driver": {
         "id": "driver-uuid",
@@ -74,18 +74,17 @@ curl -X POST "https://api.trash2cash.lk/api/admin/bookings/booking-uuid/assign" 
 
 ## Assignment Rules
 
-| Booking Status | Can Assign             |
-| -------------- | ---------------------- |
-| `PENDING`      | ✅ Yes (auto-confirms) |
-| `CONFIRMED`    | ✅ Yes                 |
-| `ASSIGNED`     | ✅ Yes (reassign)      |
-| `IN_PROGRESS`  | ❌ No                  |
-| `COMPLETED`    | ❌ No                  |
-| `CANCELLED`    | ❌ No                  |
+| Booking Status | Can Assign        |
+| -------------- | ----------------- |
+| `SCHEDULED`    | ✅ Yes            |
+| `COLLECTED`    | ✅ Yes (reassign) |
+| `PAID`         | ❌ No             |
+| `COMPLETED`    | ❌ No             |
+| `CANCELLED`    | ❌ No             |
+| `REFUNDED`     | ❌ No             |
 
 ## Notes
 
 - Driver receives a push notification when assigned
-- Booking status changes to `ASSIGNED`
-- If booking was `PENDING`, it's also confirmed
+- Booking status changes to `COLLECTED` when driver is assigned
 - Previous driver (if any) is notified of reassignment

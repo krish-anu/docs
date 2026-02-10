@@ -1,6 +1,6 @@
 ---
 title: "Prisma & Database"
-description: "Database schema, models, and Prisma ORM setup"
+description: "Database schema for waste management, models, and Prisma ORM setup in Trash2Cash"
 ---
 
 ## Overview
@@ -31,112 +31,220 @@ export class PrismaService
 
 ## Database Schema
 
+Trash2Cash uses a comprehensive Prisma schema with the following core models:
+
 ### User Model
 
-```prisma
-// prisma/schema.prisma
-model User {
-  id              String    @id @default(uuid())
-  email           String    @unique
-  password        String
-  fullName        String
-  phone           String?
-  address         String?
-  role            Role      @default(USER)
-  isVerified      Boolean   @default(false)
-  verificationOtp String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+The base user model, role-specific profiles are linked via one-to-one relations.
 
-  bookings        Booking[]
-  driverBookings  Booking[] @relation("DriverBookings")
-  subscriptions   PushSubscription[]
-  notifications   Notification[]
+```prisma
+model User {
+  id                 String              @id @default(uuid())
+  email              String              @unique
+  passwordHash       String?
+  refreshTokenHash   String?
+  role               Role                @default(CUSTOMER)
+  createdAt          DateTime            @default(now())
+
+  customer           Customer?
+  admin              Admin?
+  driver             Driver?
+  bookings           Booking[]
+  notifications      Notification[]
+  passkeyCredentials PasskeyCredential[]
+  userPermissions    UserPermission[]
+  recycler           Recycler?
+  corporate          Corporate?
 }
 
 enum Role {
-  USER
+  CUSTOMER
   ADMIN
+  SUPER_ADMIN
   DRIVER
+  RECYCLER
+  CORPORATE
+}
+```
+
+### Role-Specific Profiles
+
+Each role has a dedicated profile (one-to-one with User):
+
+```prisma
+model Customer {
+  id        String         @id
+  fullName  String
+  phone     String
+  address   String?
+  avatarUrl String?
+  type      CustomerType   @default(HOUSEHOLD)
+  status    CustomerStatus @default(ACTIVE)
+  createdAt DateTime       @default(now())
+  user      User           @relation(fields: [id], references: [id], onDelete: Cascade)
+}
+
+model Driver {
+  id          String       @id
+  fullName    String
+  phone       String
+  rating      Float        @default(0)
+  pickupCount Int          @default(0)
+  vehicle     String
+  status      DriverStatus @default(OFFLINE)
+  avatarUrl   String?
+  createdAt   DateTime     @default(now())
+  user        User         @relation(fields: [id], references: [id], onDelete: Cascade)
+  bookings    Booking[]
+}
+
+model Admin {
+  id       String  @id
+  fullName String
+  phone    String
+  address  String?
+  avatarUrl String?
+  approved Boolean @default(false)
+  user     User    @relation(fields: [id], references: [id], onDelete: Cascade)
+}
+
+enum DriverStatus {
+  ONLINE
+  OFFLINE
+  ON_PICKUP
+}
+
+enum CustomerStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum CustomerType {
+  HOUSEHOLD
+  BUSINESS
 }
 ```
 
 ### Booking Model
 
+Represents waste pickup bookings.
+
 ```prisma
 model Booking {
-  id                 String        @id @default(uuid())
-  userId             String
-  driverId           String?
-  wasteCategoryId    String
-  estimatedWeightKg  Float
-  actualWeightKg     Float?
-  estimatedMinAmount Float
-  estimatedMaxAmount Float
-  finalAmount        Float?
-  address            String
-  latitude           Float?
-  longitude          Float?
-  scheduledDate      DateTime
-  status             BookingStatus @default(PENDING)
-  notes              String?
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
+  id                   String               @id @default(uuid())
+  userId               String
+  wasteCategoryId      String
+  estimatedWeightRange String
+  estimatedMinAmount   Float
+  estimatedMaxAmount   Float
+  addressLine1         String
+  city                 String
+  postalCode           String
+  specialInstructions  String?
+  scheduledDate        DateTime
+  scheduledTimeSlot    String
+  actualWeightKg       Float?
+  finalAmountLkr       Float?
+  driverId             String?
+  createdAt            DateTime             @default(now())
+  status               BookingStatus        @default(SCHEDULED)
 
-  user           User          @relation(fields: [userId], references: [id])
-  driver         User?         @relation("DriverBookings", fields: [driverId], references: [id])
-  wasteCategory  WasteCategory @relation(fields: [wasteCategoryId], references: [id])
+  driver               Driver?              @relation(fields: [driverId], references: [id])
+  user                 User                 @relation(fields: [userId], references: [id])
+  wasteCategory        WasteCategory        @relation(fields: [wasteCategoryId], references: [id])
+  transactions         PaymentTransaction[]
 }
 
 enum BookingStatus {
-  PENDING
-  CONFIRMED
-  ASSIGNED
-  IN_PROGRESS
+  SCHEDULED
+  COLLECTED
+  PAID
   COMPLETED
   CANCELLED
+  REFUNDED
 }
 ```
 
-### Waste Category Model
+### Waste Category & Pricing
 
 ```prisma
 model WasteCategory {
   id          String    @id @default(uuid())
   name        String    @unique
   description String?
-  pricePerKg  Float
   isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
   bookings    Booking[]
+  pricing     Pricing?
+}
+
+model Pricing {
+  id               String        @id @default(uuid())
+  wasteCategoryId  String        @unique
+  minPriceLkrPerKg Float
+  maxPriceLkrPerKg Float
+  updatedAt        DateTime      @updatedAt
+  isActive         Boolean       @default(true)
+  wasteCategory    WasteCategory @relation(fields: [wasteCategoryId], references: [id])
 }
 ```
 
-### Notification Models
+### Notification & Payment Models
 
 ```prisma
-model PushSubscription {
-  id        String   @id @default(uuid())
-  userId    String
-  endpoint  String   @unique
-  keys      Json
-  createdAt DateTime @default(now())
-
-  user      User     @relation(fields: [userId], references: [id])
+model Notification {
+  id        String            @id @default(uuid())
+  userId    String?
+  title     String
+  message   String
+  isRead    Boolean           @default(false)
+  level     NotificationLevel @default(INFO)
+  createdAt DateTime          @default(now())
+  user      User?             @relation(fields: [userId], references: [id])
 }
 
-model Notification {
-  id        String   @id @default(uuid())
-  userId    String
-  title     String
-  body      String
-  data      Json?
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
+enum NotificationLevel {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
 
-  user      User     @relation(fields: [userId], references: [id])
+model PaymentTransaction {
+  id        String        @id @default(uuid())
+  bookingId String
+  amountLkr Float
+  createdAt DateTime      @default(now())
+  method    PaymentMethod
+  status    PaymentStatus @default(PROCESSED)
+  booking   Booking       @relation(fields: [bookingId], references: [id])
+}
+
+enum PaymentMethod {
+  MOBILE_WALLET
+  BANK
+}
+
+enum PaymentStatus {
+  PROCESSED
+  FAILED
+}
+```
+
+### Passkey / WebAuthn
+
+```prisma
+model PasskeyCredential {
+  id                  String   @id @default(uuid())
+  userId              String
+  credentialId        String   @unique
+  credentialPublicKey Bytes
+  counter             BigInt   @default(0)
+  transports          String[] @default([])
+  deviceName          String   @default("Passkey")
+  createdAt           DateTime @default(now())
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 ```
 
@@ -282,7 +390,7 @@ const booking = await this.prisma.booking.findUnique({
 const bookings = await this.prisma.booking.findMany({
   where: {
     userId,
-    status: { in: ["PENDING", "CONFIRMED"] },
+    status: { in: ["SCHEDULED", "COLLECTED"] },
   },
   orderBy: { createdAt: "desc" },
   skip: (page - 1) * limit,

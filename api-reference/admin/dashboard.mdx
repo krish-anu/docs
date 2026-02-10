@@ -22,7 +22,7 @@ Authorization: Bearer <token>
       "totalUsers": 150,
       "totalDrivers": 12,
       "totalBookings": 450,
-      "pendingBookings": 25,
+      "scheduledBookings": 25,
       "completedBookings": 380,
       "totalRevenue": 125000.00,
       "totalWeightCollected": 2500.5,
@@ -33,9 +33,9 @@ Authorization: Bearer <token>
           "id": "booking-uuid",
           "user": { "fullName": "John Doe" },
           "wasteCategory": { "name": "Plastic" },
-          "status": "PENDING",
-          "estimatedWeightKg": 10.5,
-          "scheduledDate": "2024-02-01T10:00:00Z"
+          "status": "SCHEDULED",
+          "estimatedWeightRange": "5-15kg",
+          "scheduledDate": "2024-02-01"
         }
       ],
       "wasteBreakdown": [

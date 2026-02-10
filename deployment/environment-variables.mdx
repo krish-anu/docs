@@ -5,150 +5,141 @@ description: "Required environment configuration for Trash2Cash"
 
 ## Overview
 
-Trash2Cash requires several environment variables for proper operation. Create `.env` files in both client and server directories.
+Trash2Cash requires environment variables for both server and client. Create `.env` files in the root directory for Docker Compose to use.
 
-## Server Environment Variables
+## Required Environment Variables
 
-Create `server/.env`:
+Create `.env` at the project root:
 
 ```bash
-# Database
-DATABASE_URL="postgresql://user:password@localhost:5432/trash2cash"
+# Database (Required)
+DATABASE_URL="postgresql://user:password@host:5432/trash2cash?schema=public"
+DIRECT_URL="postgresql://user:password@host:5432/trash2cash"
 
-# JWT
-JWT_SECRET="your-super-secret-jwt-key-min-32-chars"
+# JWT (Required)
+JWT_ACCESS_SECRET="your-access-secret-min-32-chars"
+JWT_REFRESH_SECRET="your-refresh-secret-min-32-chars"
+JWT_ACCESS_EXPIRES="15m"
+JWT_REFRESH_EXPIRES="7d"
 
-# Server
-PORT=3001
+# Server Configuration
+PORT=4000
 NODE_ENV=development
+CORS_ORIGIN=http://localhost:3000
 
-# Client URL (for CORS)
-CLIENT_URL="http://localhost:3000"
+# Frontend API URL
+NEXT_PUBLIC_API_URL=http://localhost:4000/api
 
-# Redis (optional)
-REDIS_URL="redis://localhost:6379"
-
-# Email (for OTP verification)
-SMTP_HOST="smtp.gmail.com"
-SMTP_PORT=587
-SMTP_USER="your-email@gmail.com"
-SMTP_PASS="your-app-password"
-SMTP_FROM="Trash2Cash <noreply@trash2cash.lk>"
-
-# Push Notifications (VAPID)
-VAPID_PUBLIC_KEY="your-vapid-public-key"
-VAPID_PRIVATE_KEY="your-vapid-private-key"
-VAPID_SUBJECT="mailto:admin@trash2cash.lk"
+# Third-party APIs (Optional)
+GEMINI_API_KEY="your-gemini-api-key"
+TEXTLK_API_TOKEN="your-textlk-api-token"
+TEXTLK_SENDER_ID="TextLKDemo"
 ```
 
-## Client Environment Variables
+## Docker Compose Setup
 
-Create `client/.env.local`:
+### Development Environment
 
 ```bash
-# API URL
-NEXT_PUBLIC_API_URL="http://localhost:3001/api"
+# Start services with local PostgreSQL
+docker-compose -f docker-compose.dev.yml --profile local-db up --build
 
-# Push Notifications
-NEXT_PUBLIC_VAPID_PUBLIC_KEY="your-vapid-public-key"
+# Or use external PostgreSQL
+docker-compose -f docker-compose.dev.yml up --build
 ```
 
-## Variable Reference
+### Production Environment
+
+For production, ensure your `.env` contains:
+
+```bash
+DATABASE_URL="postgresql://user:password@prod-host:5432/trash2cash?schema=public"
+DIRECT_URL="postgresql://user:password@prod-host:5432/trash2cash"
+NODE_ENV=production
+CORS_ORIGIN=https://your-production-domain.com
+NEXT_PUBLIC_API_URL=https://api.your-production-domain.com/api
+```
+
+Then start:
+
+```bash
+docker-compose -f docker-compose.prod.yml up
+```
+
+## Environment Variable Reference
 
 ### Database
 
-| Variable       | Description                  | Required | Example                               |
-| -------------- | ---------------------------- | -------- | ------------------------------------- |
-| `DATABASE_URL` | PostgreSQL connection string | ✅       | `postgresql://user:pass@host:5432/db` |
+| Variable       | Description                                   | Required | Example                                                          |
+| -------------- | --------------------------------------------- | -------- | ---------------------------------------------------------------- |
+| `DATABASE_URL` | PostgreSQL connection with schema             | ✅       | `postgresql://user:pass@localhost:5432/trash2cash?schema=public` |
+| `DIRECT_URL`   | PostgreSQL direct connection (for migrations) | ✅       | `postgresql://user:pass@localhost:5432/trash2cash`               |
 
-### Authentication
+### JWT Authentication
 
-| Variable     | Description                               | Required | Example                          |
-| ------------ | ----------------------------------------- | -------- | -------------------------------- |
-| `JWT_SECRET` | Secret key for JWT signing (min 32 chars) | ✅       | `super-secret-key-here-32-chars` |
+| Variable              | Description                              | Required | Default |
+| --------------------- | ---------------------------------------- | -------- | ------- |
+| `JWT_ACCESS_SECRET`   | Secret for access tokens (min 32 chars)  | ✅       | N/A     |
+| `JWT_REFRESH_SECRET`  | Secret for refresh tokens (min 32 chars) | ✅       | N/A     |
+| `JWT_ACCESS_EXPIRES`  | Access token expiry                      | ❌       | `15m`   |
+| `JWT_REFRESH_EXPIRES` | Refresh token expiry                     | ❌       | `7d`    |
 
 ### Server Configuration
 
-| Variable     | Description         | Required | Default                 |
-| ------------ | ------------------- | -------- | ----------------------- |
-| `PORT`       | Server port         | ❌       | `3001`                  |
-| `NODE_ENV`   | Environment mode    | ❌       | `development`           |
-| `CLIENT_URL` | Client URL for CORS | ✅       | `http://localhost:3000` |
+| Variable      | Description           | Required | Default                 |
+| ------------- | --------------------- | -------- | ----------------------- |
+| `PORT`        | Server port           | ❌       | `4000`                  |
+| `NODE_ENV`    | Run mode              | ❌       | `development`           |
+| `CORS_ORIGIN` | Frontend URL for CORS | ✅       | `http://localhost:3000` |
 
-### Redis
+### Frontend Configuration
 
-| Variable    | Description          | Required | Example                  |
-| ----------- | -------------------- | -------- | ------------------------ |
-| `REDIS_URL` | Redis connection URL | ❌       | `redis://localhost:6379` |
+| Variable                       | Description                       | Required | Default                     |
+| ------------------------------ | --------------------------------- | -------- | --------------------------- |
+| `NEXT_PUBLIC_API_URL`          | Backend API URL                   | ✅       | `http://localhost:4000/api` |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google OAuth Client ID (frontend) | ❌       | N/A                         |
 
-### Email (SMTP)
+### External APIs
 
-| Variable    | Description                | Required |
-| ----------- | -------------------------- | -------- |
-| `SMTP_HOST` | SMTP server host           | ✅       |
-| `SMTP_PORT` | SMTP server port           | ✅       |
-| `SMTP_USER` | SMTP username/email        | ✅       |
-| `SMTP_PASS` | SMTP password/app password | ✅       |
-| `SMTP_FROM` | From email address         | ✅       |
+| Variable           | Description               | Required |
+| ------------------ | ------------------------- | -------- |
+| `GEMINI_API_KEY`   | Google Gemini API key     | ❌       |
+| `TEXTLK_API_TOKEN` | Text.lk SMS gateway token | ❌       |
+| `TEXTLK_SENDER_ID` | Text.lk sender ID         | ❌       |
 
-### Push Notifications
+### Google OAuth (Server)
 
-| Variable            | Description             | Required |
-| ------------------- | ----------------------- | -------- |
-| `VAPID_PUBLIC_KEY`  | VAPID public key        | ✅       |
-| `VAPID_PRIVATE_KEY` | VAPID private key       | ✅       |
-| `VAPID_SUBJECT`     | VAPID subject (mailto:) | ✅       |
+| Variable               | Description                       | Required |
+| ---------------------- | --------------------------------- | -------- |
+| `GOOGLE_CLIENT_ID`     | Google OAuth Client ID for server | ❌       |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth Client Secret        | ❌       |
+| `GOOGLE_REDIRECT_URI`  | OAuth callback URL                | ❌       |
 
-## Generating Keys
+## Generating Secrets
 
-### JWT Secret
+### JWT Secrets
+
+Generate random 64-character secrets:
 
 ```bash
-# Generate a random 64-character secret
+# On Linux/Mac
 openssl rand -base64 48
+
+# On Windows PowerShell
+[Convert]::ToBase64String([Security.Cryptography.RNGCryptoServiceProvider]::new().GetBytes(48))
 ```
 
-### VAPID Keys
-
-```bash
-# Using web-push package
-npx web-push generate-vapid-keys
-```
-
-Output:
+Example output:
 
 ```
-Public Key: BNxK...your-public-key
-Private Key: your-private-key
+xyz123abc...def456ghi
 ```
 
-## Environment Files by Stage
+## Environment by Stage
 
-### Development
+### Local Development (with local PostgreSQL)
 
-```bash
-# server/.env
-DATABASE_URL="postgresql://trash2cash:trash2cash@localhost:5432/trash2cash"
-JWT_SECRET="dev-secret-key-for-local-development-only"
-NODE_ENV=development
-CLIENT_URL="http://localhost:3000"
-
-# client/.env.local
-NEXT_PUBLIC_API_URL="http://localhost:3001/api"
-```
-
-### Staging
-
-```bash
-# server/.env.staging
-DATABASE_URL="postgresql://user:pass@staging-db:5432/trash2cash_staging"
-JWT_SECRET="staging-secret-key-32-characters"
-NODE_ENV=staging
-CLIENT_URL="https://staging.trash2cash.lk"
-
-# client/.env.staging
-NEXT_PUBLIC_API_URL="https://api-staging.trash2cash.lk/api"
-```
+````
 
 ### Production
 
@@ -161,7 +152,7 @@ CLIENT_URL="https://trash2cash.lk"
 
 # client/.env.production
 NEXT_PUBLIC_API_URL="https://api.trash2cash.lk/api"
-```
+````
 
 ## Docker Compose Environment
 

@@ -1,6 +1,71 @@
 ---
 title: "List Users"
+description: "List all users for admin management in the Trash2Cash waste marketplace"
 openapi: "GET /api/users"
 ---
 
-Placeholder documentation for listing users.
+List all users. This endpoint is typically used by administrators for user management.
+
+## Authorization
+
+<Info>Requires ADMIN role. Include JWT token in the Authorization header.</Info>
+
+```
+Authorization: Bearer <token>
+```
+
+## Query Parameters
+
+| Parameter | Type   | Description                |
+| --------- | ------ | -------------------------- |
+| `search`  | string | Search by email or name    |
+| `role`    | string | Filter by user role        |
+| `status`  | string | Filter by status           |
+| `limit`   | number | Results per page (max 100) |
+| `offset`  | number | Pagination offset          |
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "items": [
+        {
+          "id": "user-uuid",
+          "email": "user@example.com",
+          "role": "CUSTOMER",
+          "createdAt": "2024-01-15T10:30:00Z",
+          "customer": {
+            "fullName": "John Doe",
+            "phone": "+94771234567",
+            "status": "ACTIVE"
+          }
+        }
+      ],
+      "total": 150
+    }
+    ```
+  </Tab>
+  <Tab title="403 Forbidden">
+    ```json
+    {
+      "statusCode": 403,
+      "message": "Forbidden"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+curl "https://api.trash2cash.lk/api/users?role=CUSTOMER&status=ACTIVE" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+## Notes
+
+- Only admins can access this endpoint
+- Returns user profile information based on role
+- Search is performed against email and customer/admin fullName fields

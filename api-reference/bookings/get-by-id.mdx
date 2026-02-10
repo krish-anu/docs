@@ -1,6 +1,89 @@
 ---
 title: "Get Booking By ID"
+description: "Get detailed information about a specific waste pickup booking in Trash2Cash"
 openapi: "GET /api/bookings/{id}"
 ---
 
-Placeholder documentation for fetching a booking by ID.
+Get detailed information about a specific booking.
+
+## Authorization
+
+<Info>
+  Requires authentication. Include JWT token in the Authorization header.
+</Info>
+
+```
+Authorization: Bearer <token>
+```
+
+## Path Parameters
+
+| Parameter | Type   | Description  |
+| --------- | ------ | ------------ |
+| `id`      | string | Booking UUID |
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "id": "booking-uuid",
+      "userId": "user-uuid",
+      "wasteCategoryId": "category-uuid",
+      "estimatedWeightRange": "5-15kg",
+      "estimatedMinAmount": 250.00,
+      "estimatedMaxAmount": 750.00,
+      "addressLine1": "123 Main Street",
+      "city": "Colombo",
+      "postalCode": "05",
+      "scheduledDate": "2024-02-01T10:00:00Z",
+      "scheduledTimeSlot": "10:00-12:00",
+      "status": "SCHEDULED",
+      "specialInstructions": "Please call before arriving",
+      "createdAt": "2024-01-25T14:30:00Z",
+      "actualWeightKg": null,
+      "finalAmountLkr": null,
+      "driverId": null,
+      "user": {
+        "id": "user-uuid",
+        "email": "user@example.com"
+      },
+      "wasteCategory": {
+        "id": "cat-uuid",
+        "name": "Plastic",
+        "description": "Recyclable plastics"
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="404 Not Found">
+    ```json
+    {
+      "statusCode": 404,
+      "message": "Booking not found"
+    }
+    ```
+  </Tab>
+  <Tab title="403 Forbidden">
+    ```json
+    {
+      "statusCode": 403,
+      "message": "Access denied to this booking"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+curl https://api.trash2cash.lk/api/bookings/booking-uuid \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+## Notes
+
+- Users can only view their own bookings
+- Drivers can view bookings assigned to them
+- Admins can view all bookings

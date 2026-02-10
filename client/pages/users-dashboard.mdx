@@ -1,6 +1,6 @@
 ---
 title: "User Dashboard"
-description: "Main dashboard for registered users"
+description: "Dashboard for users to track waste collection earnings and manage pickups in Trash2Cash"
 ---
 
 ## Overview
@@ -11,7 +11,7 @@ The User Dashboard (`/users/dashboard`) provides users with an at-a-glance view 
 
 <CardGroup cols={2}>
   <Card title="KPI Cards" icon="chart-simple">
-    Display total earnings, waste collected, pending pickups, and CO₂ saved.
+    Display total earnings, waste collected, pending pickups.
   </Card>
   <Card title="Quick Actions" icon="bolt">
     One-click booking creation for new waste pickups.
@@ -19,8 +19,8 @@ The User Dashboard (`/users/dashboard`) provides users with an at-a-glance view 
   <Card title="Recent Bookings" icon="history">
     View latest booking activity with status indicators.
   </Card>
-  <Card title="AI Assistant" icon="robot">
-    Chat with the AI assistant for help and support.
+  <Card title="Quick Stats" icon="trending-up">
+    Quick overview of collected waste and earnings.
   </Card>
 </CardGroup>
 
@@ -28,10 +28,9 @@ The User Dashboard (`/users/dashboard`) provides users with an at-a-glance view 
 
 | Metric          | Description                                     |
 | --------------- | ----------------------------------------------- |
-| Total Earned    | Cumulative earnings from all completed pickups  |
+| Total Earned    | Cumulative earnings from pickups                |
 | Total Waste     | Total weight (kg) of waste collected            |
 | Pending Pickups | Number of scheduled pickups awaiting collection |
-| CO₂ Saved       | Estimated carbon footprint reduction            |
 
 ## Page Structure
 
@@ -66,9 +65,8 @@ export default function DashboardPage() {
       0,
     );
     const pending = bookings.filter((b) => b.status === "SCHEDULED").length;
-    const co2 = Math.round(totalWeight * 1.7);
 
-    return { totalEarned, totalWeight, pending, co2 };
+    return { totalEarned, totalWeight, pending };
   }, [bookings]);
 
   return (
@@ -85,7 +83,6 @@ export default function DashboardPage() {
         <KpiCard label="Total Waste" value={`${metrics.totalWeight} kg`} />
         <KpiCard label="Pending Pickups" value={metrics.pending} />
         <KpiCard label="CO₂ Saved" value={`${metrics.co2} kg`} />
-      </div>
 
       {/* Quick Action */}
       <Card>

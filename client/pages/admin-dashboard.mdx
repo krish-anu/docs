@@ -1,6 +1,6 @@
 ---
 title: "Admin Dashboard"
-description: "Platform overview and statistics for administrators"
+description: "Admin dashboard for monitoring Trash2Cash platform activity, users, drivers, and bookings"
 ---
 
 ## Overview
@@ -47,8 +47,8 @@ import { KpiCard } from "@/components/shared/kpi-card";
 
 export default function AdminDashboardPage() {
   const { data: stats } = useQuery({
-    queryKey: ["admin", "stats"],
-    queryFn: () => apiFetch("/admin/stats"),
+    queryKey: ["admin", "metrics"],
+    queryFn: () => apiFetch("/admin/metrics"),
   });
 
   return (
@@ -92,7 +92,7 @@ export default function AdminDashboardPage() {
 ## API Endpoint
 
 ```http
-GET /api/admin/stats
+GET /api/admin/metrics
 
 Response:
 {
@@ -100,12 +100,9 @@ Response:
   "totalDrivers": 45,
   "totalBookings": 3890,
   "totalRevenue": 458000,
-  "activeBookings": 23,
-  "completionRate": 94.5,
-  "userGrowth": 12.5,
-  "revenueGrowth": 8.3,
-  "bookingsByCategory": [...],
-  "recentBookings": [...]
+  "scheduledBookings": 23,
+  "completedBookings": 3867,
+  "totalWeightCollected": 12450.5
 }
 ```
 

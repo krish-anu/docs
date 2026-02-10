@@ -1,9 +1,9 @@
 ---
 title: "Send Message"
-openapi: "POST /api/chat/message"
+openapi: "POST /api/chat"
 ---
 
-Send a message to the AI chat assistant.
+Send a message to the chat system. This endpoint handles real-time messaging between users and support staff.
 
 ## Authorization
 
@@ -19,15 +19,22 @@ Authorization: Bearer <token>
 
 ```json
 {
-  "message": "What types of waste do you accept?"
+  "messages": [
+    {
+      "senderType": "user",
+      "content": "What types of waste do you accept?"
+    }
+  ]
 }
 ```
 
 ## Parameters
 
-| Field     | Type   | Required | Description             |
-| --------- | ------ | -------- | ----------------------- |
-| `message` | string | Yes      | User's message/question |
+| Field                   | Type   | Required | Description                |
+| ----------------------- | ------ | -------- | -------------------------- |
+| `messages`              | array  | Yes      | Array of message objects   |
+| `messages[].senderType` | string | Yes      | Either "user" or "support" |
+| `messages[].content`    | string | Yes      | Message text content       |
 
 ## Response
 
@@ -36,8 +43,8 @@ Authorization: Bearer <token>
     ```json
     {
       "id": "message-uuid",
-      "role": "assistant",
-      "content": "We accept various types of recyclable waste including:\n\n1. **Plastic** - PET bottles, containers, packaging (LKR 50/kg)\n2. **Paper** - Newspapers, cardboard, office paper (LKR 30/kg)\n3. **Metal** - Aluminum cans, steel, copper (LKR 100/kg)\n4. **Glass** - Bottles, jars, containers (LKR 25/kg)\n5. **E-Waste** - Electronics, batteries, cables (LKR 150/kg)\n\nWould you like to schedule a pickup?",
+      "senderType": "support",
+      "content": "Response from the support team",
       "createdAt": "2024-01-25T14:30:00Z"
     }
     ```
@@ -46,7 +53,7 @@ Authorization: Bearer <token>
     ```json
     {
       "statusCode": 400,
-      "message": "Message is required"
+      "message": "Messages array is required"
     }
     ```
   </Tab>
@@ -55,15 +62,20 @@ Authorization: Bearer <token>
 ## Example
 
 ```bash
-curl -X POST "https://api.trash2cash.lk/api/chat/message" \
+curl -X POST "https://api.trash2cash.lk/api/chat" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -H "Content-Type: application/json" \
-  -d '{ "message": "What types of waste do you accept?" }'
+  -d '{
+    "messages": [{
+      "senderType": "user",
+      "content": "What types of waste do you accept?"
+    }]
+  }'
 ```
 
-## Sample Questions
+## Sample Topics
 
-The assistant can help with:
+Support staff can help with:
 
 - "What types of waste do you accept?"
 - "How does pricing work?"
@@ -74,6 +86,6 @@ The assistant can help with:
 
 ## Notes
 
-- Assistant has context about Trash2Cash services
-- Responses are formatted with markdown
-- Chat history is maintained per user session
+- Support staff responds to messages during business hours
+- Chat history is maintained per user
+- Messages are stored for support reference

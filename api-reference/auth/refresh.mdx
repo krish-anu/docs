@@ -3,4 +3,55 @@ title: "Refresh Token"
 openapi: "POST /api/auth/refresh"
 ---
 
-Placeholder documentation for the refresh token endpoint.
+Generate a new access token using a valid refresh token. This endpoint is called automatically when an access token expires.
+
+## Request Body
+
+```json
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+## Parameters
+
+| Field          | Type   | Required | Description                     |
+| -------------- | ------ | -------- | ------------------------------- |
+| `refreshToken` | string | Yes      | Valid refresh token (7 day TTL) |
+
+## Response
+
+<Tabs>
+  <Tab title="200 OK">
+    ```json
+    {
+      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    }
+    ```
+  </Tab>
+  <Tab title="401 Unauthorized">
+    ```json
+    {
+      "statusCode": 401,
+      "message": "Invalid or expired refresh token"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Example
+
+```bash
+curl -X POST https://api.trash2cash.lk/api/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }'
+```
+
+## Notes
+
+- Access tokens expire after 15 minutes
+- Refresh tokens are valid for 7 days
+- Both tokens are stored in HTTP-only cookies by the client automatically

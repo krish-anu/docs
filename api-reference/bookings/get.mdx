@@ -31,17 +31,18 @@ Authorization: Bearer <token>
       "userId": "user-uuid",
       "driverId": "driver-uuid",
       "wasteCategoryId": "category-uuid",
-      "estimatedWeightKg": 10.5,
+      "estimatedWeightRange": "5-15kg",
       "actualWeightKg": 11.0,
-      "estimatedMinAmount": 472.50,
-      "estimatedMaxAmount": 577.50,
-      "finalAmount": 550.00,
-      "address": "123 Main Street, Colombo 05",
-      "latitude": 6.9271,
-      "longitude": 79.8612,
-      "scheduledDate": "2024-02-01T10:00:00Z",
+      "estimatedMinAmount": 200.00,
+      "estimatedMaxAmount": 900.00,
+      "finalAmountLkr": 550.00,
+      "addressLine1": "123 Main Street",
+      "city": "Colombo",
+      "postalCode": "05",
+      "scheduledDate": "2024-02-01",
+      "scheduledTimeSlot": "10:00-12:00",
       "status": "COMPLETED",
-      "notes": "Please call before arriving",
+      "specialInstructions": "Please call before arriving",
       "createdAt": "2024-01-25T14:30:00Z",
       "updatedAt": "2024-02-01T11:30:00Z",
       "user": {
@@ -59,7 +60,8 @@ Authorization: Bearer <token>
         "id": "category-uuid",
         "name": "Plastic",
         "description": "All types of recyclable plastic",
-        "pricePerKg": 50.00
+        "minPriceLkrPerKg": 40.00,
+        "maxPriceLkrPerKg": 60.00
       }
     }
     ```

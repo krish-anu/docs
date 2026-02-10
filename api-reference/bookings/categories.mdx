@@ -19,35 +19,40 @@ Get all available waste categories with pricing.
         "id": "cat-plastic-uuid",
         "name": "Plastic",
         "description": "PET bottles, containers, packaging materials",
-        "pricePerKg": 50.00,
+        "minPriceLkrPerKg": 40.00,
+        "maxPriceLkrPerKg": 60.00,
         "isActive": true
       },
       {
         "id": "cat-paper-uuid",
         "name": "Paper",
         "description": "Newspapers, cardboard, office paper",
-        "pricePerKg": 30.00,
+        "minPriceLkrPerKg": 20.00,
+        "maxPriceLkrPerKg": 35.00,
         "isActive": true
       },
       {
         "id": "cat-metal-uuid",
         "name": "Metal",
         "description": "Aluminum cans, steel, copper",
-        "pricePerKg": 100.00,
+        "minPriceLkrPerKg": 80.00,
+        "maxPriceLkrPerKg": 120.00,
         "isActive": true
       },
       {
         "id": "cat-glass-uuid",
         "name": "Glass",
         "description": "Bottles, jars, containers",
-        "pricePerKg": 25.00,
+        "minPriceLkrPerKg": 15.00,
+        "maxPriceLkrPerKg": 30.00,
         "isActive": true
       },
       {
         "id": "cat-ewaste-uuid",
         "name": "E-Waste",
         "description": "Electronics, batteries, cables",
-        "pricePerKg": 150.00,
+        "minPriceLkrPerKg": 100.00,
+        "maxPriceLkrPerKg": 200.00,
         "isActive": true
       }
     ]
@@ -65,5 +70,6 @@ curl "https://api.trash2cash.lk/api/bookings/categories"
 
 - Only active categories are returned
 - Prices are in LKR (Sri Lankan Rupees) per kilogram
+- `minPriceLkrPerKg` and `maxPriceLkrPerKg` represent the price range
 - Use the `id` when creating a booking
 - Admins can update pricing via `/api/admin/pricing`

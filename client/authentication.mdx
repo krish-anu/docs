@@ -1,30 +1,47 @@
 ---
 title: "Authentication"
-description: "Client-side authentication implementation"
+description: "Client-side authentication with JWT access and refresh tokens"
 ---
 
 ## Overview
 
-The client implements JWT-based authentication with automatic token refresh and role-based access control.
+The client implements JWT-based authentication using separate access and refresh tokens. Tokens are stored in HTTP-only cookies and automatically refreshed when needed.
 
 ## Auth Flow
+
+Access tokens expire after 15 minutes. When an access token expires, the client automatically uses the refresh token to obtain a new one without requiring user action.
 
 ```mermaid
 sequenceDiagram
     participant U as User
     participant C as Client
-    participant A as API
+    participant API as Backend
 
-    U->>C: Enter credentials
-    C->>A: POST /auth/login
-    A-->>C: { accessToken, refreshToken, user }
-    C->>C: Store tokens in cookies
+    U->>C: Enter email & password
+    C->>API: POST /auth/login
+    API-->>C: accessToken + refreshToken
+    C->>C: Store in HTTP-only cookies
     C-->>U: Redirect to dashboard
+
+    Note over U: Tokens auto-refresh<br/>after 15 minutes
+
+    C->>API: GET /users/me (expired token)
+    API-->>C: 401 Unauthorized
+    C->>API: POST /auth/refresh
+    API-->>C: New accessToken
+    C->>API: Retry original request
+    API-->>C: Success
 ```
 
-## AuthProvider
+## Token Storage
 
-The `AuthProvider` component manages authentication state:
+- **Access Token**: Stored in HTTP-only cookie `accessToken` (15min expiry)
+- **Refresh Token**: Stored in HTTP-only cookie `refreshToken` (7 day expiry)
+- **Benefits**: HTTP-only prevents XSS attacks, Secure flag for HTTPS only
+
+## AuthProvider Component
+
+The `AuthProvider` manages authentication state globally:
 
 ```tsx
 // components/auth/auth-provider.tsx
