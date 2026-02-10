@@ -1,5 +1,6 @@
 ---
 title: "Verify OTP"
+description: "Verify user email address using the OTP sent during signup"
 openapi: "POST /api/auth/verify-otp"
 ---
 
@@ -57,7 +58,7 @@ Verify a user's email and account using the OTP sent during signup or password r
 ## Example
 
 ```bash
-curl -X POST https://api.trash2cash.lk/api/auth/verify-otp \
+curl -X POST https://api.trash2treasure.lk/api/auth/verify-otp \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",

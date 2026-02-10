@@ -1,5 +1,6 @@
 ---
 title: "Resend OTP"
+description: "Request a new OTP to be sent to user email for verification"
 openapi: "POST /api/auth/resend-otp"
 ---
 
@@ -50,7 +51,7 @@ Request a new OTP to be sent to the user's email.
 ## Example
 
 ```bash
-curl -X POST https://api.trash2cash.lk/api/auth/resend-otp \
+curl -X POST https://api.trash2treasure.lk/api/auth/resend-otp \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com"

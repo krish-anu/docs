@@ -1,5 +1,6 @@
 ---
 title: "Cancel Booking"
+description: "Cancel an existing waste pickup booking"
 openapi: "POST /api/bookings/{id}/cancel"
 ---
 
@@ -62,7 +63,7 @@ Authorization: Bearer <token>
 ## Example
 
 ```bash
-curl -X POST "https://api.trash2cash.lk/api/bookings/booking-uuid/cancel" \
+curl -X POST "https://api.trash2treasure.lk/api/bookings/booking-uuid/cancel" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -H "Content-Type: application/json" \
   -d '{ "reason": "Schedule conflict" }'

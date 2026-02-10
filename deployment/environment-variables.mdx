@@ -1,11 +1,11 @@
 ---
 title: "Environment Variables"
-description: "Required environment configuration for Trash2Cash"
+description: "Required environment configuration for Trash2Treasure"
 ---
 
 ## Overview
 
-Trash2Cash requires environment variables for both server and client. Create `.env` files in the root directory for Docker Compose to use.
+Trash2Treasure requires environment variables for both server and client. Create `.env` files in the root directory for Docker Compose to use.
 
 ## Required Environment Variables
 
@@ -13,8 +13,8 @@ Create `.env` at the project root:
 
 ```bash
 # Database (Required)
-DATABASE_URL="postgresql://user:password@host:5432/trash2cash?schema=public"
-DIRECT_URL="postgresql://user:password@host:5432/trash2cash"
+DATABASE_URL="postgresql://user:password@host:5432/trash2treasure?schema=public"
+DIRECT_URL="postgresql://user:password@host:5432/trash2treasure"
 
 # JWT (Required)
 JWT_ACCESS_SECRET="your-access-secret-min-32-chars"
@@ -53,8 +53,8 @@ docker-compose -f docker-compose.dev.yml up --build
 For production, ensure your `.env` contains:
 
 ```bash
-DATABASE_URL="postgresql://user:password@prod-host:5432/trash2cash?schema=public"
-DIRECT_URL="postgresql://user:password@prod-host:5432/trash2cash"
+DATABASE_URL="postgresql://user:password@prod-host:5432/trash2treasure?schema=public"
+DIRECT_URL="postgresql://user:password@prod-host:5432/trash2treasure"
 NODE_ENV=production
 CORS_ORIGIN=https://your-production-domain.com
 NEXT_PUBLIC_API_URL=https://api.your-production-domain.com/api
@@ -70,10 +70,10 @@ docker-compose -f docker-compose.prod.yml up
 
 ### Database
 
-| Variable       | Description                                   | Required | Example                                                          |
-| -------------- | --------------------------------------------- | -------- | ---------------------------------------------------------------- |
-| `DATABASE_URL` | PostgreSQL connection with schema             | ✅       | `postgresql://user:pass@localhost:5432/trash2cash?schema=public` |
-| `DIRECT_URL`   | PostgreSQL direct connection (for migrations) | ✅       | `postgresql://user:pass@localhost:5432/trash2cash`               |
+| Variable       | Description                                   | Required | Example                                                              |
+| -------------- | --------------------------------------------- | -------- | -------------------------------------------------------------------- |
+| `DATABASE_URL` | PostgreSQL connection with schema             | ✅       | `postgresql://user:pass@localhost:5432/trash2treasure?schema=public` |
+| `DIRECT_URL`   | PostgreSQL direct connection (for migrations) | ✅       | `postgresql://user:pass@localhost:5432/trash2treasure`               |
 
 ### JWT Authentication
 
@@ -145,13 +145,13 @@ xyz123abc...def456ghi
 
 ```bash
 # server/.env.production
-DATABASE_URL="postgresql://user:pass@prod-db:5432/trash2cash"
+DATABASE_URL="postgresql://user:pass@prod-db:5432/trash2treasure"
 JWT_SECRET="production-super-secure-secret-key"
 NODE_ENV=production
-CLIENT_URL="https://trash2cash.lk"
+CLIENT_URL="https://trash2treasure.lk"
 
 # client/.env.production
-NEXT_PUBLIC_API_URL="https://api.trash2cash.lk/api"
+NEXT_PUBLIC_API_URL="https://api.trash2treasure.lk/api"
 ````
 
 ## Docker Compose Environment

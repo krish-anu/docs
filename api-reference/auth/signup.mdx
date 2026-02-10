@@ -1,5 +1,6 @@
 ---
 title: "Signup"
+description: "Register a new user account and receive OTP verification for the Trash2Treasure platform"
 openapi: "POST /api/auth/signup"
 ---
 
@@ -59,7 +60,7 @@ Register a new user account. An OTP will be sent to the provided email for verif
 ## Example
 
 ```bash
-curl -X POST https://api.trash2cash.lk/api/auth/signup \
+curl -X POST https://api.trash2treasure.lk/api/auth/signup \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",

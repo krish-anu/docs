@@ -1,5 +1,6 @@
 ---
-title: "Admin — Manage Users"
+title: "List Users"
+description: "List and manage all users on the Trash2Treasure platform with role filtering"
 openapi: "GET /api/admin/users"
 ---
 
@@ -64,15 +65,15 @@ Authorization: Bearer <token>
 
 ```bash
 # Get all users
-curl "https://api.trash2cash.lk/api/admin/users" \
+curl "https://api.trash2treasure.lk/api/admin/users" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
 # Filter by role
-curl "https://api.trash2cash.lk/api/admin/users?role=DRIVER" \
+curl "https://api.trash2treasure.lk/api/admin/users?role=DRIVER" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
 # Search users
-curl "https://api.trash2cash.lk/api/admin/users?search=john" \
+curl "https://api.trash2treasure.lk/api/admin/users?search=john" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 

@@ -1,5 +1,6 @@
 ---
 title: "Get Notifications"
+description: "Retrieve all notifications for the current user with filtering options"
 openapi: "GET /api/notifications"
 ---
 
@@ -68,11 +69,11 @@ Authorization: Bearer <token>
 
 ```bash
 # Get all notifications
-curl "https://api.trash2cash.lk/api/notifications" \
+curl "https://api.trash2treasure.lk/api/notifications" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
 # Get unread only
-curl "https://api.trash2cash.lk/api/notifications?unreadOnly=true" \
+curl "https://api.trash2treasure.lk/api/notifications?unreadOnly=true" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 

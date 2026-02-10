@@ -1,6 +1,6 @@
 ---
 title: "Login"
-description: "Authenticate a user for the Trash2Cash waste marketplace and return a JWT token"
+description: "Authenticate a user for the Trash2Treasure waste marketplace and return a JWT token"
 openapi: "POST /api/auth/login"
 ---
 
@@ -62,7 +62,7 @@ Authenticate a user and receive a JWT token.
 ## Example
 
 ```bash
-curl -X POST https://api.trash2cash.lk/api/auth/login \
+curl -X POST https://api.trash2treasure.lk/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -75,7 +75,7 @@ curl -X POST https://api.trash2cash.lk/api/auth/login \
 Include the token in the `Authorization` header for authenticated requests:
 
 ```bash
-curl https://api.trash2cash.lk/api/users/me \
+curl https://api.trash2treasure.lk/api/users/me \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
@@ -91,7 +91,7 @@ curl https://api.trash2cash.lk/api/users/me \
 Access tokens expire after 15 minutes. Use the refresh token (sent as httpOnly cookie) to get a new access token:
 
 ```bash
-curl -X POST https://api.trash2cash.lk/api/auth/refresh \
+curl -X POST https://api.trash2treasure.lk/api/auth/refresh \
   -H "Cookie: refreshToken=<refresh_token>" \
   -H "Content-Type: application/json"
 ```

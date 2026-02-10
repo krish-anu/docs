@@ -1,5 +1,6 @@
 ---
-title: "Mark as Read"
+title: "Mark Notifications as Read"
+description: "Mark one or more notifications as read, or mark all notifications as read"
 openapi: "POST /api/notifications/mark-read"
 ---
 
@@ -64,7 +65,7 @@ Or mark all as read:
 ### Mark Specific Notifications
 
 ```bash
-curl -X POST "https://api.trash2cash.lk/api/notifications/mark-read" \
+curl -X POST "https://api.trash2treasure.lk/api/notifications/mark-read" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -H "Content-Type: application/json" \
   -d '{ "notificationIds": ["uuid-1", "uuid-2"] }'
@@ -73,7 +74,7 @@ curl -X POST "https://api.trash2cash.lk/api/notifications/mark-read" \
 ### Mark All as Read
 
 ```bash
-curl -X POST "https://api.trash2cash.lk/api/notifications/mark-read" \
+curl -X POST "https://api.trash2treasure.lk/api/notifications/mark-read" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -H "Content-Type: application/json" \
   -d '{ "all": true }'

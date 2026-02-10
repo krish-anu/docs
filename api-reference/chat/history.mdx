@@ -1,5 +1,6 @@
 ---
 title: "Chat History"
+description: "Retrieve conversation history for a specific booking or support thread"
 openapi: "GET /api/chat/history"
 ---
 
@@ -71,11 +72,11 @@ Authorization: Bearer <token>
 
 ```bash
 # Get last 50 messages (default)
-curl "https://api.trash2cash.lk/api/chat/history" \
+curl "https://api.trash2treasure.lk/api/chat/history" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
 # Get last 10 messages
-curl "https://api.trash2cash.lk/api/chat/history?limit=10" \
+curl "https://api.trash2treasure.lk/api/chat/history?limit=10" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 

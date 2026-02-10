@@ -3,7 +3,7 @@ title: "Waste Categories"
 openapi: "GET /api/bookings/categories"
 ---
 
-Get all available waste categories with pricing.
+Get all available waste categories with current pricing based on market rates.
 
 ## Authorization
 
@@ -17,42 +17,34 @@ Get all available waste categories with pricing.
     [
       {
         "id": "cat-plastic-uuid",
-        "name": "Plastic",
-        "description": "PET bottles, containers, packaging materials",
-        "minPriceLkrPerKg": 40.00,
-        "maxPriceLkrPerKg": 60.00,
-        "isActive": true
-      },
-      {
-        "id": "cat-paper-uuid",
-        "name": "Paper",
-        "description": "Newspapers, cardboard, office paper",
-        "minPriceLkrPerKg": 20.00,
-        "maxPriceLkrPerKg": 35.00,
+        "name": "Plastic (PET)",
+        "description": "PET bottles, containers, and packaging materials",
+        "minPriceLkrPerKg": 45.00,
+        "maxPriceLkrPerKg": 70.00,
         "isActive": true
       },
       {
         "id": "cat-metal-uuid",
-        "name": "Metal",
-        "description": "Aluminum cans, steel, copper",
-        "minPriceLkrPerKg": 80.00,
-        "maxPriceLkrPerKg": 120.00,
+        "name": "Metal (Aluminum)",
+        "description": "Aluminum cans, foil, and aluminum products",
+        "minPriceLkrPerKg": 160.00,
+        "maxPriceLkrPerKg": 240.00,
         "isActive": true
       },
       {
-        "id": "cat-glass-uuid",
-        "name": "Glass",
-        "description": "Bottles, jars, containers",
-        "minPriceLkrPerKg": 15.00,
-        "maxPriceLkrPerKg": 30.00,
+        "id": "cat-cardboard-uuid",
+        "name": "Cardboard",
+        "description": "Cardboard boxes, paper packaging, and corrugated materials",
+        "minPriceLkrPerKg": 30.00,
+        "maxPriceLkrPerKg": 55.00,
         "isActive": true
       },
       {
         "id": "cat-ewaste-uuid",
         "name": "E-Waste",
-        "description": "Electronics, batteries, cables",
-        "minPriceLkrPerKg": 100.00,
-        "maxPriceLkrPerKg": 200.00,
+        "description": "Electronics waste, batteries, cables, and electronic devices",
+        "minPriceLkrPerKg": 220.00,
+        "maxPriceLkrPerKg": 450.00,
         "isActive": true
       }
     ]
@@ -63,7 +55,7 @@ Get all available waste categories with pricing.
 ## Example
 
 ```bash
-curl "https://api.trash2cash.lk/api/bookings/categories"
+curl "https://api.trash2treasure.lk/api/bookings/categories"
 ```
 
 ## Notes

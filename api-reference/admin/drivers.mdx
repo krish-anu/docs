@@ -1,5 +1,6 @@
 ---
 title: "List Drivers"
+description: "List all drivers with filtering by status and performance metrics"
 openapi: "GET /api/admin/drivers"
 ---
 
@@ -75,11 +76,11 @@ Authorization: Bearer <token>
 
 ```bash
 # Get all drivers
-curl "https://api.trash2cash.lk/api/admin/drivers" \
+curl "https://api.trash2treasure.lk/api/admin/drivers" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
 # Filter available drivers
-curl "https://api.trash2cash.lk/api/admin/drivers?available=true" \
+curl "https://api.trash2treasure.lk/api/admin/drivers?available=true" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 

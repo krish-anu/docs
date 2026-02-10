@@ -1,5 +1,6 @@
 ---
 title: "Assign Driver"
+description: "Assign a driver to a waste pickup booking"
 openapi: "POST /api/admin/bookings/{id}/assign"
 ---
 
@@ -66,7 +67,7 @@ Authorization: Bearer <token>
 ## Example
 
 ```bash
-curl -X POST "https://api.trash2cash.lk/api/admin/bookings/booking-uuid/assign" \
+curl -X POST "https://api.trash2treasure.lk/api/admin/bookings/booking-uuid/assign" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -H "Content-Type: application/json" \
   -d '{ "driverId": "driver-uuid" }'

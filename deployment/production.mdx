@@ -1,11 +1,11 @@
 ---
 title: "Production Deployment"
-description: "Deploy Trash2Cash waste marketplace to production"
+description: "Deploy Trash2Treasure waste marketplace to production"
 ---
 
 ## Overview
 
-This guide covers deploying Trash2Cash to production environments including cloud platforms and VPS.
+This guide covers deploying Trash2Treasure to production environments including cloud platforms and VPS.
 
 ## Pre-Deployment Checklist
 
@@ -23,15 +23,15 @@ This guide covers deploying Trash2Cash to production environments including clou
 
 ### Option 1: Docker on VPS with Prebuilt Images
 
-Deploy using prebuilt images from Docker Hub (anusan2003/trash2cash).
+Deploy using prebuilt images from Docker Hub (anusan2003/trash2treasure).
 
 ```bash
 # SSH into your server
 ssh user@your-server.com
 
 # Clone repository
-git clone https://github.com/trash2cash/trash2cash.git
-cd trash2cash
+git clone https://github.com/trash2treasure/trash2treasure.git
+cd trash2treasure
 
 # Create production env file
 cp .env.example .env
@@ -188,19 +188,19 @@ volumes:
 ## Nginx Reverse Proxy
 
 ```nginx
-# /etc/nginx/sites-available/trash2cash
+# /etc/nginx/sites-available/trash2treasure
 server {
     listen 80;
-    server_name trash2cash.lk www.trash2cash.lk;
+    server_name trash2treasure.lk www.trash2treasure.lk;
     return 301 https://$server_name$request_uri;
 }
 
 server {
     listen 443 ssl http2;
-    server_name trash2cash.lk www.trash2cash.lk;
+    server_name trash2treasure.lk www.trash2treasure.lk;
 
-    ssl_certificate /etc/letsencrypt/live/trash2cash.lk/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/trash2cash.lk/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/trash2treasure.lk/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/trash2treasure.lk/privkey.pem;
 
     # Client (Next.js)
     location / {
@@ -231,7 +231,7 @@ server {
 sudo apt install certbot python3-certbot-nginx
 
 # Obtain certificate
-sudo certbot --nginx -d trash2cash.lk -d www.trash2cash.lk
+sudo certbot --nginx -d trash2treasure.lk -d www.trash2treasure.lk
 
 # Auto-renewal (runs automatically)
 sudo certbot renew --dry-run

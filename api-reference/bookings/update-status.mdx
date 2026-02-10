@@ -1,5 +1,6 @@
 ---
 title: "Update Booking Status"
+description: "Update the status of a waste pickup booking (e.g., scheduled to completed)"
 openapi: "PATCH /api/bookings/{id}/status"
 ---
 
@@ -74,7 +75,7 @@ Authorization: Bearer <token>
 ## Example
 
 ```bash
-curl -X PATCH https://api.trash2cash.lk/api/bookings/booking-uuid/status \
+curl -X PATCH https://api.trash2treasure.lk/api/bookings/booking-uuid/status \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -d '{

@@ -1,11 +1,11 @@
 ---
 title: "Prisma & Database"
-description: "Database schema for waste management, models, and Prisma ORM setup in Trash2Cash"
+description: "Database schema for waste management, models, and Prisma ORM setup in Trash2Treasure"
 ---
 
 ## Overview
 
-Trash2Cash uses [Prisma](https://www.prisma.io/) as the ORM with PostgreSQL as the database.
+Trash2Treasure uses [Prisma](https://www.prisma.io/) as the ORM with PostgreSQL as the database.
 
 ## Prisma Setup
 
@@ -31,7 +31,7 @@ export class PrismaService
 
 ## Database Schema
 
-Trash2Cash uses a comprehensive Prisma schema with the following core models:
+Trash2Treasure uses a comprehensive Prisma schema with the following core models:
 
 ### User Model
 
@@ -336,10 +336,10 @@ async function main() {
   // Create admin user
   const adminPassword = await bcrypt.hash("admin123", 10);
   await prisma.user.upsert({
-    where: { email: "admin@trash2cash.lk" },
+    where: { email: "admin@trash2treasure.lk" },
     update: {},
     create: {
-      email: "admin@trash2cash.lk",
+      email: "admin@trash2treasure.lk",
       password: adminPassword,
       fullName: "Admin User",
       role: "ADMIN",

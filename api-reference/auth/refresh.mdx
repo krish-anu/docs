@@ -1,5 +1,6 @@
 ---
 title: "Refresh Token"
+description: "Refresh an expired JWT access token using a valid refresh token"
 openapi: "POST /api/auth/refresh"
 ---
 
@@ -43,7 +44,7 @@ Generate a new access token using a valid refresh token. This endpoint is called
 ## Example
 
 ```bash
-curl -X POST https://api.trash2cash.lk/api/auth/refresh \
+curl -X POST https://api.trash2treasure.lk/api/auth/refresh \
   -H "Content-Type: application/json" \
   -d '{
     "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."

@@ -1,5 +1,6 @@
 ---
 title: "List Bookings"
+description: "List all waste pickup bookings with filtering and pagination options"
 openapi: "GET /api/bookings"
 ---
 
@@ -70,15 +71,15 @@ Authorization: Bearer <token>
 
 ```bash
 # Get all bookings
-curl "https://api.trash2cash.lk/api/bookings" \
+curl "https://api.trash2treasure.lk/api/bookings" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
 # Filter by status
-curl "https://api.trash2cash.lk/api/bookings?status=PENDING" \
+curl "https://api.trash2treasure.lk/api/bookings?status=PENDING" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
 # Paginate
-curl "https://api.trash2cash.lk/api/bookings?page=2&limit=5" \
+curl "https://api.trash2treasure.lk/api/bookings?page=2&limit=5" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
